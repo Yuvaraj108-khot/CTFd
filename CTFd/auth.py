@@ -429,6 +429,9 @@ def register():
         )
         db.session.close()
 
+        if not user.filled_all_required_fields:
+            return redirect(url_for("views.settings"))
+
         if is_teams_mode():
             return redirect(url_for("teams.private"))
 
@@ -485,11 +488,23 @@ def login():
                 login_user(user)
                 log("logins", "[{date}] {ip} - {name} logged in", name=user.name)
 
+                profile_complete = user.filled_all_required_fields
+                user_team_id = user.team_id
                 db.session.close()
-                if request.args.get("next") and validators.is_safe_url(
-                    request.args.get("next")
-                ):
-                    return redirect(request.args.get("next"))
+
+                next_url = request.args.get("next")
+                if next_url and validators.is_safe_url(next_url):
+                    if profile_complete and (next_url.rstrip("/").endswith("/settings") or next_url == "/settings"):
+                        pass  # Don't redirect back to settings if profile is already complete
+                    elif not profile_complete:
+                        return redirect(url_for("views.settings"))
+                    else:
+                        return redirect(next_url)
+
+                if not profile_complete:
+                    return redirect(url_for("views.settings"))
+                if is_teams_mode() and user_team_id is None:
+                    return redirect(url_for("teams.private"))
                 return redirect(url_for("challenges.listing"))
 
             else:

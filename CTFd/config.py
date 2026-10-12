@@ -11,6 +11,7 @@ _FORCED_EXTRA_CONFIG_TYPES = {}
 
 class EnvInterpolation(configparser.BasicInterpolation):
     """Interpolation which expands environment variables in values."""
+    
 
     def before_get(self, parser, section, option, value, defaults):
         value = super().before_get(parser, section, option, value, defaults)

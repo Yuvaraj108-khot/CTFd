@@ -303,7 +303,7 @@ def notifications():
     return render_template("notifications.html", notifications=notifications)
 
 
-@views.route("/settings", methods=["GET"])
+@views.route("/settings", methods=["GET", "POST"])
 @authed_only
 def settings():
     infos = get_infos()
@@ -311,37 +311,63 @@ def settings():
 
     user = get_current_user()
 
-    if is_teams_mode() and get_current_team() is None:
-        team_url = url_for("teams.private")
-        infos.append(
-            markup(
-                f'In order to participate you must either <a href="{team_url}">join or create a team</a>.'
-            )
-        )
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        usn = request.form.get("usn", "").strip()
+        college_email = request.form.get("college_email", "").strip()
+        year_of_study = request.form.get("year_of_study", "").strip()
+        department = request.form.get("department", "").strip()
 
-    tokens = UserTokens.query.filter_by(user_id=user.id).all()
+        if not name:
+            errors.append("Full Name is mandatory.")
+        if not usn:
+            errors.append("USN (University Seat Number) is mandatory.")
+        if not college_email:
+            errors.append("College Email ID is mandatory.")
+        if not year_of_study:
+            errors.append("Year of Study is mandatory.")
+        if not department:
+            errors.append("Department is mandatory.")
 
-    prevent_name_change = get_config("prevent_name_change")
+        if not errors:
+            user.name = name
+            user.usn = usn
+            user.college_email = college_email
+            user.year_of_study = year_of_study
+            user.department = department
+            user.profile_completed = True
+            db.session.commit()
 
-    if can_send_mail() and not user.verified:
-        confirm_url = markup(url_for("auth.confirm", flow="init"))
-        infos.append(
-            markup(
-                "Your email address isn't confirmed!<br>"
-                f'To confirm your email address please <a href="{confirm_url}">click here</a>.'
-            )
-        )
+            from CTFd.cache import clear_user_session
+            clear_user_session(user_id=user.id)
+
+            # Proceed to the next part: creating and/or joining the team!
+            if is_teams_mode():
+                if user.team_id:
+                    return redirect(url_for("challenges.listing"))
+                else:
+                    return redirect(url_for("teams.private"))
+            else:
+                return redirect(url_for("challenges.listing"))
+
+    if not user.profile_completed and user.type != "admin":
+        msg = "Please complete your profile details below. All fields are mandatory to proceed to team creation/joining."
+        if msg not in infos:
+            infos.append(msg)
+    elif user.profile_completed and user.type != "admin":
+        msg = "Your profile is completed! You can update your details below or proceed to Challenges."
+        if msg not in infos:
+            infos.append(msg)
 
     return render_template(
         "settings.html",
-        name=user.name,
-        email=user.email,
-        language=user.language,
-        website=user.website,
-        affiliation=user.affiliation,
-        country=user.country,
-        tokens=tokens,
-        prevent_name_change=prevent_name_change,
+        name=user.name or "",
+        usn=user.usn or "",
+        college_email=user.college_email or user.email or "",
+        year_of_study=user.year_of_study or "",
+        department=user.department or "",
+        profile_completed=bool(user.profile_completed),
+        user=user,
         infos=infos,
         errors=errors,
     )

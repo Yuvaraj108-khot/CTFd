@@ -14,22 +14,25 @@ from CTFd.utils.helpers.models import build_model_filters
 from CTFd.utils.modes import generate_account_url, get_model
 
 # TODO: CTFd 4.0. Consider changing to a dataclass
-ChallengeFields = [
-    "id",
-    "type",
-    "name",
-    "value",
-    "category",
-    "tags",
-    "requirements",
-    "position",
-    "module_id",
-]
 Challenge = namedtuple(
     "Challenge",
-    ChallengeFields,
-    defaults=(None,) * len(ChallengeFields),
+    [
+        "id",
+        "type",
+        "name",
+        "value",
+        "category",
+        "tags",
+        "requirements",
+        "position",
+        "module_id",
+        "scheduled_at",
+        "is_locked",
+        "unlock_in_seconds",
+    ],
+    defaults=(None,) * 12,
 )
+ChallengeFields = list(Challenge._fields)
 
 Rating = namedtuple("Rating", ["up", "down", "count"])
 
@@ -41,11 +44,7 @@ def get_all_challenges(admin=False, field=None, q=None, **query_args):
     # Admins can see hidden and locked challenges in the admin view
     if admin is False:
         chal_q = chal_q.filter(
-            and_(Challenges.state != "hidden", Challenges.state != "locked"),
-            or_(
-                Challenges.scheduled_at.is_(None),
-                Challenges.scheduled_at <= datetime.datetime.utcnow(),
-            ),
+            and_(Challenges.state != "hidden", Challenges.state != "locked")
         )
     chal_q = (
         chal_q.filter_by(**query_args)
@@ -62,17 +61,25 @@ def get_all_challenges(admin=False, field=None, q=None, **query_args):
     tag_schema = TagSchema(view="user", many=True)
 
     results = []
+    now_dt = datetime.datetime.utcnow()
     for c in chal_q:
+        is_locked_sched = bool(c.scheduled_at and c.scheduled_at > now_dt)
+        name = "Locked Challenge" if (is_locked_sched and not admin) else c.name
+        unlock_diff = max(0, int((c.scheduled_at - now_dt).total_seconds())) if (c.scheduled_at and is_locked_sched) else 0
+
         ct = Challenge(
             id=c.id,
-            type=c.type,
-            name=c.name,
+            type="scheduled" if (is_locked_sched and not admin) else c.type,
+            name=name,
             value=c.value,
             category=c.category,
-            tags=tag_schema.dump(c.tags).data,
-            requirements=c.requirements,
+            tags=[] if (is_locked_sched and not admin) else tag_schema.dump(c.tags).data,
+            requirements=None if (is_locked_sched and not admin) else c.requirements,
             position=c.position,
             module_id=c.module_id,
+            scheduled_at=c.scheduled_at.isoformat() + "Z" if c.scheduled_at else None,
+            is_locked=is_locked_sched if not admin else False,
+            unlock_in_seconds=unlock_diff if not admin else 0,
         )
         results.append(ct)
     return results

@@ -2,10 +2,15 @@
 
 {% block content %}
   <div class="jumbotron">
-    <div class="container">
+    <div class="container d-flex justify-content-between align-items-center">
       <h1>
         {% trans %}Scoreboard{% endtrans %}
       </h1>
+      {% if is_admin() %}
+        <span class="badge bg-danger text-white p-2" style="font-size: 0.95rem;">
+          <i class="fas fa-bolt me-1"></i> Admin View: Live &amp; Updating Every Second
+        </span>
+      {% endif %}
     </div>
   </div>
   <div class="container">
@@ -64,5 +69,10 @@
 {% endblock %}
 
 {% block scripts %}
+  {% if is_admin() %}
+  <script>
+    window.scoreboardUpdateInterval = 1000;
+  </script>
+  {% endif %}
   {{ Assets.js("assets/js/scoreboard.js") }}
 {% endblock %}

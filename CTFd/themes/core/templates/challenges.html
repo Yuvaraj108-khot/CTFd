@@ -9,7 +9,49 @@
     </div>
   </div>
 
-  <div class="container">
+  <div class="container" id="challenges-telemetry-container">
+    <!-- Event Telemetry Banner -->
+    <div id="event-status-banner" class="mb-4" style="display: none;">
+      <!-- Upcoming Banner -->
+      <div id="banner-upcoming" class="alert alert-primary py-3 px-4 shadow-sm" style="display: none; border-left: 5px solid #0d6efd;">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+          <div>
+            <h5 class="alert-heading font-weight-bold mb-1">
+              <i class="fas fa-hourglass-start me-2"></i>Competition is Upcoming
+            </h5>
+            <p class="mb-0 text-muted small">Challenges will automatically unlock and flag submissions will open when the competition starts.</p>
+          </div>
+          <div class="mt-2 mt-md-0 text-center">
+            <span class="badge bg-primary text-uppercase font-weight-bold px-3 py-2 font-monospace" style="font-size: 1.15rem;" id="banner-upcoming-clock">
+              00:00:00
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paused Banner -->
+      <div id="banner-paused" class="alert alert-warning py-3 px-4 shadow-sm" style="display: none; border-left: 5px solid #ffc107;">
+        <div class="d-flex align-items-center">
+          <i class="fas fa-pause-circle fa-2x me-3 text-warning"></i>
+          <div>
+            <h5 class="alert-heading font-weight-bold mb-1 text-dark">Competition is Currently Paused</h5>
+            <p class="mb-0 text-dark small">Event organizers have temporarily paused the event. Flag submissions are disabled until the clock resumes.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ended Banner -->
+      <div id="banner-ended" class="alert alert-secondary py-3 px-4 shadow-sm" style="display: none; border-left: 5px solid #6c757d;">
+        <div class="d-flex align-items-center">
+          <i class="fas fa-flag-checkered fa-2x me-3 text-secondary"></i>
+          <div>
+            <h5 class="alert-heading font-weight-bold mb-1">Competition Has Ended</h5>
+            <p class="mb-0 text-muted small">Submissions are now closed. You may continue viewing challenges and scoreboard standings.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="row">
       <div class="col-md-12">
         {% include "components/errors.html" %}
@@ -49,14 +91,33 @@
                         class="challenge-button btn btn-dark w-100 h-100"
                         :class="[
                           c.solved_by_me ? 'challenge-solved' : '',
+                          c.is_locked ? 'disabled border-secondary opacity-75' : '',
                           ...c.tags.map((tag) => `tag-${tag.value.replace(/ /g, '-')}`),
                         ];"
-                        :value="c.id" @click="loadChallenge(c.id)"
+                        :value="c.id"
+                        :disabled="c.is_locked"
+                        @click="!c.is_locked && loadChallenge(c.id)"
                     >
-
                       <div class="challenge-inner my-3">
-                        <p x-text="c.name"></p>
-                        <span x-text="c.value"></span>
+                        <template x-if="c.is_locked">
+                          <div>
+                            <p class="text-muted mb-1">
+                              <i class="fas fa-lock text-warning me-1"></i>
+                              <span x-text="c.name"></span>
+                            </p>
+                            <span class="badge bg-secondary mb-2" x-text="c.value + ' pts'"></span>
+                            <div class="small text-warning font-monospace py-1 px-2 rounded bg-dark border border-secondary d-inline-block">
+                              <i class="fas fa-clock me-1"></i>
+                              <span class="chal-countdown-timer" :data-chal-id="c.id" :data-initial-secs="c.unlock_in_seconds" x-text="formatCountdown(c.unlock_in_seconds)"></span>
+                            </div>
+                          </div>
+                        </template>
+                        <template x-if="!c.is_locked">
+                          <div>
+                            <p x-text="c.name"></p>
+                            <span x-text="c.value"></span>
+                          </div>
+                        </template>
                       </div>
                     </button>
                   </div>
@@ -72,4 +133,54 @@
 
 {% block scripts %}
   {{ Assets.js("assets/js/challenges.js") }}
-{% endblock %}
+  <script>
+  function formatCountdown(secs) {
+    if (secs === null || secs === undefined || isNaN(secs)) return '--:--:--';
+    if (secs <= 0) return '00:00:00';
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  // Update banners based on event schedule updates
+  window.addEventListener('event-schedule-updated', function(e) {
+    const data = e.detail;
+    if (!data) return;
+
+    const bannerContainer = document.getElementById('event-status-banner');
+    const upcomingBanner = document.getElementById('banner-upcoming');
+    const pausedBanner = document.getElementById('banner-paused');
+    const endedBanner = document.getElementById('banner-ended');
+    const upcomingClock = document.getElementById('banner-upcoming-clock');
+
+    if (bannerContainer) {
+      bannerContainer.style.display = (data.status !== 'live') ? 'block' : 'none';
+      if (upcomingBanner) upcomingBanner.style.display = (data.status === 'upcoming') ? 'block' : 'none';
+      if (pausedBanner) pausedBanner.style.display = (data.status === 'paused') ? 'block' : 'none';
+      if (endedBanner) endedBanner.style.display = (data.status === 'ended') ? 'block' : 'none';
+      if (upcomingClock && data.time_to_start_seconds) {
+        upcomingClock.innerText = formatCountdown(data.time_to_start_seconds);
+      }
+    }
+  });
+
+  // Second-by-second countdown for locked challenges + auto-reveal
+  setInterval(function() {
+    let triggeredAutoUnlock = false;
+    document.querySelectorAll('.chal-countdown-timer').forEach(function(el) {
+      let secs = parseInt(el.dataset.initialSecs);
+      if (!isNaN(secs) && secs > 0) {
+        secs--;
+        el.dataset.initialSecs = secs;
+        el.innerText = formatCountdown(secs);
+        if (secs <= 0 && !triggeredAutoUnlock) {
+          triggeredAutoUnlock = true;
+          // Trigger instant auto-reveal without full page refresh!
+          window.dispatchEvent(new CustomEvent('load-challenges'));
+        }
+      }
+    });
+  }, 1000);
+  </script>
+{% endblock %}

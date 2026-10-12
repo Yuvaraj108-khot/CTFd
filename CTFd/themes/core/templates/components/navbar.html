@@ -1,16 +1,10 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
   <div class="container">
-    <a href="{{ url_for('views.static_html', route='/') }}" class="navbar-brand">
-      {% if Configs.ctf_logo %}
-        <img
-            class="img-responsive ctf_logo"
-            src="{{ url_for('views.files', path=Configs.ctf_logo) }}"
-            alt="{{ Configs.ctf_name }}"
-            height="25"
-        >
-      {% else %}
-        {{ Configs.ctf_name }}
-      {% endif %}
+    <a href="{{ url_for('views.static_html', route='/') }}" class="navbar-brand d-inline-flex align-items-center py-1">
+      <div class="d-inline-flex align-items-center bg-white rounded-pill px-2 py-1 me-2 shadow-sm">
+        <img src="{{ url_for('views.themes', path='img/logo_acm.png') }}" alt="ACM" height="28" style="max-width: 38px; object-fit: contain;">
+      </div>
+      <span class="fw-bold tracking-wide">ACM CTF</span>
     </a>
 
     <button
@@ -58,6 +52,14 @@
           <a class="nav-link" href="{{ url_for('challenges.listing') }}">
             {% trans %}Challenges{% endtrans %}
           </a>
+        </li>
+
+        <li class="nav-item d-flex align-items-center ms-md-2 my-2 my-md-0" id="nav-event-telemetry" style="display: none !important;">
+          <span class="badge d-inline-flex align-items-center px-2 py-1" id="nav-status-badge" style="font-size: 0.82rem; letter-spacing: 0.5px;">
+            <i class="fas fa-circle me-1" id="nav-status-dot" style="font-size: 0.5rem;"></i>
+            <span id="nav-status-text" class="fw-bold">LIVE</span>
+            <span class="font-monospace ms-1" id="nav-countdown-clock">00:00:00</span>
+          </span>
         </li>
       </ul>
 

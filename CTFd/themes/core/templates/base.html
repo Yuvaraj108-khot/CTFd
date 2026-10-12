@@ -21,7 +21,7 @@
           'urlRoot': "{{ request.script_root }}",
           'csrfNonce': "{{ Session.nonce }}",
           'userMode': "{{ Configs.user_mode }}",
-          'userId': {{ Session.id }},
+          'userId': {{ Session.id | tojson }},
           'userName': {{ User.name | tojson }},
           'userEmail': {{ User.email | tojson }},
           'userVerified': {{ User.verified | tojson }},
@@ -49,15 +49,7 @@
 
 {% include "components/snackbar.html" %}
 
-<footer class="footer">
-  <div class="container text-center">
-    <a href="https://ctfd.io" class="text-secondary">
-      <small class="text-muted">
-        {% trans %}Powered by CTFd{% endtrans %}
-      </small>
-    </a>
-  </div>
-</footer>
+
 
 {% include "components/notifications.html" %}
 
@@ -68,5 +60,94 @@
 {{ Plugins.scripts }}
 
 {{ Configs.theme_footer }}
+<script>
+(function() {
+  let scheduleState = null;
+
+  function formatTime(totalSecs) {
+    if (totalSecs === null || totalSecs === undefined || isNaN(totalSecs)) return "--:--:--";
+    if (totalSecs <= 0) return "00:00:00";
+    const h = Math.floor(totalSecs / 3600);
+    const m = Math.floor((totalSecs % 3600) / 60);
+    const s = totalSecs % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  function renderNavbarTelemetry() {
+    const navEl = document.getElementById('nav-event-telemetry');
+    const badgeEl = document.getElementById('nav-status-badge');
+    const dotEl = document.getElementById('nav-status-dot');
+    const textEl = document.getElementById('nav-status-text');
+    const clockEl = document.getElementById('nav-countdown-clock');
+    if (!navEl || !scheduleState) return;
+
+    if (!scheduleState.start && !scheduleState.end) {
+      navEl.style.setProperty('display', 'none', 'important');
+      return;
+    }
+
+    // Show telemetry item
+    navEl.style.setProperty('display', 'flex', 'important');
+
+    const status = scheduleState.status;
+    badgeEl.className = 'badge d-inline-flex align-items-center px-2 py-1';
+
+    if (status === 'paused') {
+      badgeEl.classList.add('bg-warning', 'text-dark');
+      textEl.innerText = 'PAUSED';
+      clockEl.innerText = formatTime(scheduleState.time_remaining_seconds);
+    } else if (status === 'upcoming') {
+      badgeEl.classList.add('bg-primary', 'text-white');
+      textEl.innerText = 'STARTS';
+      clockEl.innerText = formatTime(scheduleState.time_to_start_seconds);
+    } else if (status === 'ended') {
+      badgeEl.classList.add('bg-danger', 'text-white');
+      textEl.innerText = 'ENDED';
+      clockEl.innerText = '00:00:00';
+    } else {
+      // Live
+      if (scheduleState.time_remaining_seconds && scheduleState.time_remaining_seconds < 3600) {
+        badgeEl.classList.add('bg-danger', 'text-white');
+      } else {
+        badgeEl.classList.add('bg-success', 'text-white');
+      }
+      textEl.innerText = 'REMAINING';
+      clockEl.innerText = formatTime(scheduleState.time_remaining_seconds);
+    }
+  }
+
+  function tickCountdowns() {
+    if (!scheduleState) return;
+    if (scheduleState.status === 'live' && scheduleState.time_remaining_seconds > 0) {
+      scheduleState.time_remaining_seconds--;
+      if (scheduleState.time_remaining_seconds <= 0) {
+        fetchStatus();
+      }
+    } else if (scheduleState.status === 'upcoming' && scheduleState.time_to_start_seconds > 0) {
+      scheduleState.time_to_start_seconds--;
+      if (scheduleState.time_to_start_seconds <= 0) {
+        fetchStatus();
+      }
+    }
+    renderNavbarTelemetry();
+  }
+
+  async function fetchStatus() {
+    try {
+      const res = await fetch('/api/v1/schedule/status');
+      const json = await res.json();
+      if (json && json.success) {
+        scheduleState = json.data;
+        renderNavbarTelemetry();
+        window.dispatchEvent(new CustomEvent('event-schedule-updated', { detail: scheduleState }));
+      }
+    } catch(e) {}
+  }
+
+  fetchStatus();
+  setInterval(tickCountdowns, 1000);
+  setInterval(fetchStatus, 30000);
+})();
+</script>
 </body>
 </html>

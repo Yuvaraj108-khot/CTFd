@@ -1,0 +1,354 @@
+<div class="modal fade" id="createNewChallengeModal" tabindex="-1" role="dialog" aria-labelledby="createNewChallengeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h5 class="modal-title font-weight-bold" id="createNewChallengeModalLabel">Create Challenge</h5>
+        <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <form id="createChallengeFullForm" method="POST" action="{{ url_for('admin.challenges_new') }}" enctype="multipart/form-data">
+          <input type="hidden" name="nonce" value="{{ Session.nonce }}">
+          <input type="hidden" name="state" value="visible">
+          <input type="hidden" name="ajax" value="true">
+
+          <!-- Challenge Title -->
+          <div class="form-group">
+            <label>
+              Name:<br>
+              <small class="form-text text-muted">The name of your challenge</small>
+            </label>
+            <input type="text" class="form-control" name="name" required placeholder="Enter challenge name">
+          </div>
+
+          <!-- Row: Category, Difficulty, Points, Source Track -->
+          <div class="form-row">
+            <div class="form-group col-md-3 col-sm-6">
+              <label>
+                Category:<br>
+                <small class="form-text text-muted">Challenge category</small>
+              </label>
+              <select class="form-control custom-select" name="category" id="modalChalCategory" onchange="toggleCustomCategory(this)">
+                <option value="Web" selected>Web</option>
+                <option value="Crypto">Crypto</option>
+                <option value="Forensics">Forensics</option>
+                <option value="OSINT">OSINT</option>
+                <option value="Reverse Engineering">Reverse Engineering</option>
+                <option value="Pwn">Pwn</option>
+                <option value="Miscellaneous">Miscellaneous</option>
+                <option value="Custom">+ Custom Category</option>
+              </select>
+              <input type="text" class="form-control mt-2 d-none" name="custom_category" id="modalCustomCategory" placeholder="Custom category">
+            </div>
+
+            <div class="form-group col-md-3 col-sm-6">
+              <label>
+                Difficulty:<br>
+                <small class="form-text text-muted">Challenge difficulty</small>
+              </label>
+              <select class="form-control custom-select" name="difficulty">
+                <option value="Easy" selected>Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+                <option value="Insane">Insane</option>
+              </select>
+            </div>
+
+            <div class="form-group col-md-3 col-sm-6">
+              <label>
+                Value:<br>
+                <small class="form-text text-muted">Points rewarded</small>
+              </label>
+              <input type="number" class="form-control" name="value" value="100" required min="1">
+            </div>
+
+            <div class="form-group col-md-3 col-sm-6">
+              <label>
+                Source Track:<br>
+                <small class="form-text text-muted">Track / Division</small>
+              </label>
+              <select class="form-control custom-select" name="source_track" id="modalChalTrack" onchange="toggleCustomTrack(this)">
+                <option value="ACM" selected>ACM</option>
+                <option value="General">General</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Advanced">Advanced</option>
+                <option value="Custom">+ Custom Track</option>
+              </select>
+              <input type="text" class="form-control mt-2 d-none" name="custom_track" id="modalCustomTrack" placeholder="Custom track">
+            </div>
+          </div>
+
+          <!-- Target Flag Answer -->
+          <div class="form-group">
+            <div class="row">
+              <div class="col-md-8">
+                <label>
+                  Flag:<br>
+                  <small class="form-text text-muted">Target flag answer validated on submission</small>
+                </label>
+                <input type="text" class="form-control" name="flag" required placeholder="flag{...}">
+              </div>
+              <div class="col-md-4">
+                <label>
+                  &nbsp;<br>
+                  <small class="form-text text-muted">&nbsp;</small>
+                </label>
+                <select class="form-control custom-select" name="flag_data">
+                  <option value="">Case Sensitive</option>
+                  <option value="case_insensitive">Case Insensitive</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unlock Time (Scheduled Drop) -->
+          <div class="form-group">
+            <label>
+              Unlock Date & Time (Optional):<br>
+              <small class="form-text text-muted">Leave empty to unlock immediately, or pick a date/time to schedule drop</small>
+            </label>
+            <input type="datetime-local" step="1" class="form-control" name="scheduled_at">
+          </div>
+
+          <!-- Description / Markdown Brief -->
+          <div class="form-group">
+            <label>
+              Message / Description:<br>
+              <small class="form-text text-muted">Challenge instructions, endpoints, and clues</small>
+            </label>
+            <textarea class="form-control" name="description" rows="6" placeholder="Enter challenge description..."></textarea>
+          </div>
+
+          <!-- Enable Target Instance Sandbox -->
+          <div class="card mb-3">
+            <div class="card-body py-2">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="form-check mb-0">
+                  <input class="form-check-input" type="checkbox" id="modalSandboxToggle" name="sandbox_enabled" onchange="updateSandboxStatus()">
+                  <label class="form-check-label font-weight-bold cursor-pointer" for="modalSandboxToggle">
+                    Enable Target Instance Sandbox (Live Service / Container)
+                  </label>
+                </div>
+                <span id="modalSandboxBadge" class="badge badge-secondary">DISABLED</span>
+              </div>
+              <div id="modalSandboxContainer" class="mt-2 d-none">
+                <label class="small text-muted mb-1">Container Endpoint / Connection Command:</label>
+                <input type="text" class="form-control" name="connection_info" id="modalConnectionInfo" placeholder="e.g. nc instance.ctf.local 1337 or http://sandbox.challenge.local:8080">
+                <small class="form-text text-muted">Participants will see this connection endpoint on the challenge modal.</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Challenge Attachments & Google Drive Links -->
+          <div class="card mb-3">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center flex-wrap">
+              <div>
+                <strong>Challenge Attachments & Google Drive Links</strong> (<span id="modalAttachCount">0</span>)
+                <br><small class="text-muted">Attach files or paste Google Drive / external links</small>
+              </div>
+              <div class="btn-group mt-1">
+                <button type="button" class="btn btn-sm btn-outline-info" onclick="promptAddGDriveLink()">
+                  <i class="fab fa-google-drive"></i> Add Google Drive Link
+                </button>
+                <label class="btn btn-sm btn-outline-secondary mb-0 cursor-pointer ml-1">
+                  <i class="fas fa-file-upload"></i> Upload File
+                  <input type="file" id="modalFilesInput" name="files" multiple class="d-none" onchange="handleModalFileSelect(this)">
+                </label>
+              </div>
+            </div>
+            <div class="card-body py-2">
+              <div id="modalEmptyAttachText" class="text-muted small text-center py-2">
+                No files or Google Drive links attached.
+              </div>
+              <div id="modalAttachedList" class="list-group list-group-flush"></div>
+            </div>
+          </div>
+
+          <div id="modalGDriveInputsContainer"></div>
+
+          <!-- Action Buttons -->
+          <div class="modal-footer px-0 pb-0 pt-2 border-0">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" id="modalSaveChalBtn" class="btn btn-primary">
+              <span id="modalSaveBtnText">Create Challenge</span>
+              <span id="modalSaveSpinner" class="spinner-border spinner-border-sm d-none ml-1" role="status" aria-hidden="true"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+let attachedGDriveLinks = [];
+let attachedFiles = [];
+
+function toggleCustomCategory(sel) {
+  const customInput = document.getElementById('modalCustomCategory');
+  if (sel.value === 'Custom') {
+    customInput.classList.remove('d-none');
+    customInput.focus();
+  } else {
+    customInput.classList.add('d-none');
+  }
+}
+
+function toggleCustomTrack(sel) {
+  const customInput = document.getElementById('modalCustomTrack');
+  if (sel.value === 'Custom') {
+    customInput.classList.remove('d-none');
+    customInput.focus();
+  } else {
+    customInput.classList.add('d-none');
+  }
+}
+
+function updateSandboxStatus() {
+  const chk = document.getElementById('modalSandboxToggle');
+  const badge = document.getElementById('modalSandboxBadge');
+  const container = document.getElementById('modalSandboxContainer');
+  if (chk.checked) {
+    badge.textContent = 'ENABLED';
+    badge.className = 'badge badge-success';
+    container.classList.remove('d-none');
+  } else {
+    badge.textContent = 'DISABLED';
+    badge.className = 'badge badge-secondary';
+    container.classList.add('d-none');
+  }
+}
+
+function promptAddGDriveLink() {
+  const link = prompt('Enter Google Drive / External URL:');
+  if (!link || !link.trim()) return;
+  const name = prompt('Enter Display Name (e.g. final.jpg, Challenge Drive):', 'Google Drive Link') || 'Google Drive Link';
+  
+  attachedGDriveLinks.push({ name: name.trim(), url: link.trim() });
+  renderAttachedItems();
+}
+
+function handleModalFileSelect(input) {
+  if (input.files) {
+    for (let i = 0; i < input.files.length; i++) {
+      attachedFiles.push(input.files[i]);
+    }
+  }
+  renderAttachedItems();
+}
+
+function removeGDriveLink(idx) {
+  attachedGDriveLinks.splice(idx, 1);
+  renderAttachedItems();
+}
+
+function removeFileItem(idx) {
+  attachedFiles.splice(idx, 1);
+  renderAttachedItems();
+}
+
+function renderAttachedItems() {
+  const container = document.getElementById('modalAttachedList');
+  const emptyText = document.getElementById('modalEmptyAttachText');
+  const countSpan = document.getElementById('modalAttachCount');
+  const gdriveInputs = document.getElementById('modalGDriveInputsContainer');
+  
+  const totalCount = attachedGDriveLinks.length + attachedFiles.length;
+  countSpan.textContent = totalCount;
+  
+  if (totalCount === 0) {
+    emptyText.classList.remove('d-none');
+    container.innerHTML = '';
+    gdriveInputs.innerHTML = '';
+    return;
+  }
+  
+  emptyText.classList.add('d-none');
+  let html = '';
+  let inputsHtml = '';
+
+  attachedGDriveLinks.forEach((item, idx) => {
+    html += `
+      <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+        <div>
+          <i class="fab fa-google-drive text-info mr-2"></i>
+          <strong>${item.name}</strong>
+          <a href="${item.url}" target="_blank" class="small text-muted ml-2 text-truncate d-inline-block" style="max-width: 320px;">(${item.url})</a>
+        </div>
+        <button type="button" class="btn btn-sm text-danger p-0 border-0" onclick="removeGDriveLink(${idx})" title="Remove link">&times;</button>
+      </div>
+    `;
+    inputsHtml += `<input type="hidden" name="gdrive_links[]" value="${item.url}">`;
+    inputsHtml += `<input type="hidden" name="gdrive_names[]" value="${item.name}">`;
+  });
+
+  attachedFiles.forEach((file, idx) => {
+    const sizeKb = (file.size / 1024).toFixed(1);
+    html += `
+      <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+        <div>
+          <i class="fas fa-file-alt text-secondary mr-2"></i>
+          <strong>${file.name}</strong>
+          <span class="small text-muted ml-2">(${sizeKb} KB)</span>
+        </div>
+        <button type="button" class="btn btn-sm text-danger p-0 border-0" onclick="removeFileItem(${idx})" title="Remove file">&times;</button>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+  gdriveInputs.innerHTML = inputsHtml;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('createChallengeFullForm');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('modalSaveChalBtn');
+      const spinner = document.getElementById('modalSaveSpinner');
+      const btnText = document.getElementById('modalSaveBtnText');
+      
+      saveBtn.disabled = true;
+      spinner.classList.remove('d-none');
+      btnText.textContent = 'Creating...';
+
+      const formData = new FormData(form);
+      formData.delete('files');
+      attachedFiles.forEach(file => {
+        formData.append('files', file);
+      });
+
+      fetch("{{ url_for('admin.challenges_new') }}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'CSRF-Token': '{{ Session.nonce }}'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          window.location.reload();
+        } else {
+          alert('Error creating challenge: ' + (data.errors ? JSON.stringify(data.errors) : 'Unknown error'));
+          saveBtn.disabled = false;
+          spinner.classList.add('d-none');
+          btnText.textContent = 'Create Challenge';
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        window.location.reload();
+      });
+    });
+  }
+});
+</script>

@@ -248,6 +248,28 @@ class ChallengeList(Resource):
                     # Fallthrough to continue
                     continue
 
+            if getattr(challenge, "is_locked", False):
+                response.append(
+                    {
+                        "id": challenge.id,
+                        "type": "scheduled",
+                        "name": "Locked Challenge",
+                        "value": challenge.value,
+                        "position": challenge.position,
+                        "solves": None,
+                        "solved_by_me": False,
+                        "category": challenge.category,
+                        "module_id": challenge.module_id,
+                        "tags": [],
+                        "template": "",
+                        "script": "",
+                        "is_locked": True,
+                        "scheduled_at": getattr(challenge, "scheduled_at", None),
+                        "unlock_in_seconds": getattr(challenge, "unlock_in_seconds", 0),
+                    }
+                )
+                continue
+
             try:
                 challenge_type = get_chal_class(challenge.type)
             except KeyError:
@@ -269,6 +291,9 @@ class ChallengeList(Resource):
                     "tags": challenge.tags,
                     "template": challenge_type.templates["view"],
                     "script": challenge_type.scripts["view"],
+                    "is_locked": False,
+                    "scheduled_at": getattr(challenge, "scheduled_at", None),
+                    "unlock_in_seconds": 0,
                 }
             )
 
@@ -722,7 +747,28 @@ class ChallengeAttempt(Resource):
             abort(404)
 
         if challenge.state == "locked":
-            abort(403)
+            return (
+                {
+                    "success": False,
+                    "data": {
+                        "status": "locked",
+                        "message": "This challenge is currently locked.",
+                    },
+                },
+                403,
+            )
+
+        if challenge.scheduled_at and challenge.scheduled_at > datetime.utcnow():
+            return (
+                {
+                    "success": False,
+                    "data": {
+                        "status": "locked",
+                        "message": "This challenge has not unlocked yet.",
+                    },
+                },
+                403,
+            )
 
         if not can_access_challenge(challenge, user):
             abort(404)

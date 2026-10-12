@@ -18,12 +18,16 @@ scoreboard = Blueprint("scoreboard", __name__)
 @check_score_visibility
 def listing():
     infos = get_infos()
+    admin = is_admin()
 
     if config.is_scoreboard_frozen():
-        infos.append("Scoreboard has been frozen")
+        if admin:
+            infos.append("Scoreboard is frozen for participants, but you are viewing live, real-time un-frozen scores as an Administrator.")
+        else:
+            infos.append("Scoreboard has been frozen")
 
-    if is_admin() is True and scores_visible() is False:
+    if admin is True and scores_visible() is False:
         infos.append("Scores are not currently visible to users")
 
-    standings = get_standings()
+    standings = get_standings(admin=admin)
     return render_template("scoreboard.html", standings=standings, infos=infos)

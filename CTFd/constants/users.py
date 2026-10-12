@@ -19,8 +19,13 @@ UserAttrsFields = [
     "team_id",
     "created",
     "change_password",
+    "usn",
+    "college_email",
+    "year_of_study",
+    "department",
+    "profile_completed",
 ]
-UserAttrs = namedtuple(
+UserAttrs = namedtuple(  # type: ignore
     "UserAttrs", UserAttrsFields, defaults=(None,) * len(UserAttrsFields)
 )
 
@@ -43,6 +48,19 @@ class _UserAttrsWrapper:
         from CTFd.utils.user import get_user_score
 
         return get_user_score(user_id=self.id)
+
+    @property
+    def filled_all_required_fields(self):
+        if self.type == "admin":
+            return True
+        return bool(
+            self.name and str(self.name).strip() and
+            self.usn and str(self.usn).strip() and
+            self.college_email and str(self.college_email).strip() and
+            self.year_of_study and str(self.year_of_study).strip() and
+            self.department and str(self.department).strip() and
+            self.profile_completed
+        )
 
 
 User = _UserAttrsWrapper()

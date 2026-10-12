@@ -24,6 +24,7 @@ from CTFd.admin import modules  # noqa: F401,I001
 from CTFd.admin import notifications  # noqa: F401,I001
 from CTFd.admin import pages  # noqa: F401,I001
 from CTFd.admin import scoreboard  # noqa: F401,I001
+from CTFd.admin import schedule  # noqa: F401,I001
 from CTFd.admin import statistics  # noqa: F401,I001
 from CTFd.admin import submissions  # noqa: F401,I001
 from CTFd.admin import teams  # noqa: F401,I001

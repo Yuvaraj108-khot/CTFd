@@ -8,11 +8,10 @@ from CTFd.utils.modes import generate_account_url
 from CTFd.utils.scores import get_standings
 
 
-@cache.memoize(timeout=60)
-def get_scoreboard_detail(count, bracket_id=None):
+def _query_scoreboard_detail(count, bracket_id=None, admin=False):
     response = {}
 
-    standings = get_standings(count=count, bracket_id=bracket_id)
+    standings = get_standings(count=count, bracket_id=bracket_id, admin=admin)
 
     team_ids = [team.account_id for team in standings]
 
@@ -21,7 +20,7 @@ def get_scoreboard_detail(count, bracket_id=None):
 
     freeze = get_config("freeze")
 
-    if freeze:
+    if not admin and freeze:
         solves = solves.filter(Solves.date < unix_time_to_utc(freeze))
         awards = awards.filter(Awards.date < unix_time_to_utc(freeze))
 
@@ -70,3 +69,18 @@ def get_scoreboard_detail(count, bracket_id=None):
         }
 
     return response
+
+
+@cache.memoize(timeout=60)
+def _cached_get_scoreboard_detail(count, bracket_id=None):
+    return _query_scoreboard_detail(count=count, bracket_id=bracket_id, admin=False)
+
+
+def get_scoreboard_detail(count, bracket_id=None, admin=False):
+    """
+    Get top scoreboard detail graph data.
+    If admin=True, bypasses caching and freeze, returning real-time data directly from DB.
+    """
+    if admin:
+        return _query_scoreboard_detail(count=count, bracket_id=bracket_id, admin=True)
+    return _cached_get_scoreboard_detail(count=count, bracket_id=bracket_id)

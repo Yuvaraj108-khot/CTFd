@@ -10,105 +10,319 @@
 	</div>
 </div>
 
-<div class="modal fade bd-example-modal-lg" role="dialog" id="challenge-create-options">
-	<div class="modal-dialog modal-lg">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title">Options</h5>
-				<button type="button" class="close" data-dismiss="modal">
-					<span>&times;</span>
-				</button>
-			</div>
-			<div class="modal-body">
-				<form method="POST" enctype="multipart/form-data">
-					<div class="form-group">
-						<div class="row">
-							<div class="col-md-8">
-								<label>
-									Flag:<br>
-									<small class="form-text text-muted">Static flag for your challenge</small>
-								</label>
-								<input type="text" class="form-control" name="flag">
-							</div>
-							<div class="col-md-4">
-								<label>
-									&nbsp;
-									<small class="form-text text-muted">&nbsp;</small>
-								</label>
-								<select class="form-control custom-select w-100" name="flag_data">
-									<option value="">Case Sensitive</option>
-									<option value="case_insensitive">Case Insensitive</option>
-								</select>
-							</div>
-						</div>
-						<input type="hidden" name="flag_type" value="static">
-					</div>
-					<div class="form-group">
-						<div class="form-group">
-							<label>
-								Files:
-								<small class="form-text text-muted">Files distributed along with your challenge</small>
-							</label>
-							<input class="form-control-file" type="file" name="file" multiple="multiple">
-							<sub class="text-muted">Attach multiple files using Control+Click or Cmd+Click</sub>
-						</div>
-					</div>
-					<div class="form-group">
-						<label>
-							State<br>
-							<small class="form-text text-muted">Should the challenge be visible to users</small>
-						</label>
-						<select class="form-control custom-select" name="state">
-							<option value="visible">Visible</option>
-							<option value="hidden" selected>Hidden</option>
-						</select>
-					</div>
-					<input id="challenge_id" type="hidden" name="challenge_id">
-					<div class="form-group">
-						<button class="btn btn-primary float-right create-challenge-submit" type="submit">Finish</button>
-					</div>
-				</form>
-			</div>
-		</div>
-	</div>
+<div class="container pb-5">
+  <div class="row">
+    <div class="col-md-10 offset-md-1">
+      <div class="card">
+        <div class="card-header">
+          <strong>Challenge Details</strong>
+        </div>
+        <div class="card-body">
+          <form id="createChallengePageForm" method="POST" action="{{ url_for('admin.challenges_new') }}" enctype="multipart/form-data">
+            <input type="hidden" name="nonce" value="{{ Session.nonce }}">
+            <input type="hidden" name="state" value="visible">
+
+            <!-- Name -->
+            <div class="form-group">
+              <label>
+                Name:<br>
+                <small class="form-text text-muted">The name of your challenge</small>
+              </label>
+              <input type="text" class="form-control" name="name" required placeholder="Enter challenge name">
+            </div>
+
+            <!-- Row: Category, Difficulty, Value, Source Track -->
+            <div class="form-row">
+              <div class="form-group col-md-3 col-sm-6">
+                <label>
+                  Category:<br>
+                  <small class="form-text text-muted">The category of your challenge</small>
+                </label>
+                <select class="form-control custom-select" name="category" id="pageChalCategory" onchange="toggleCustomCategoryPage(this)">
+                  <option value="Web" selected>Web</option>
+                  <option value="Crypto">Crypto</option>
+                  <option value="Forensics">Forensics</option>
+                  <option value="OSINT">OSINT</option>
+                  <option value="Reverse Engineering">Reverse Engineering</option>
+                  <option value="Pwn">Pwn</option>
+                  <option value="Miscellaneous">Miscellaneous</option>
+                  <option value="Custom">+ Custom Category</option>
+                </select>
+                <input type="text" class="form-control mt-2 d-none" name="custom_category" id="pageCustomCategory" placeholder="Enter custom category">
+              </div>
+
+              <div class="form-group col-md-3 col-sm-6">
+                <label>
+                  Difficulty:<br>
+                  <small class="form-text text-muted">Difficulty tier</small>
+                </label>
+                <select class="form-control custom-select" name="difficulty">
+                  <option value="Easy" selected>Easy</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Hard">Hard</option>
+                  <option value="Insane">Insane</option>
+                </select>
+              </div>
+
+              <div class="form-group col-md-3 col-sm-6">
+                <label>
+                  Value:<br>
+                  <small class="form-text text-muted">Points rewarded for solving</small>
+                </label>
+                <input type="number" class="form-control" name="value" value="100" required min="1">
+              </div>
+
+              <div class="form-group col-md-3 col-sm-6">
+                <label>
+                  Source Track:<br>
+                  <small class="form-text text-muted">Track / Division</small>
+                </label>
+                <select class="form-control custom-select" name="source_track" id="pageChalTrack" onchange="toggleCustomTrackPage(this)">
+                  <option value="ACM" selected>ACM</option>
+                  <option value="General">General</option>
+                  <option value="Beginner">Beginner</option>
+                  <option value="Advanced">Advanced</option>
+                  <option value="Custom">+ Custom Track</option>
+                </select>
+                <input type="text" class="form-control mt-2 d-none" name="custom_track" id="pageCustomTrack" placeholder="Enter custom track">
+              </div>
+            </div>
+
+            <!-- Flag -->
+            <div class="form-group">
+              <div class="row">
+                <div class="col-md-8">
+                  <label>
+                    Flag:<br>
+                    <small class="form-text text-muted">Target flag answer validated on submission</small>
+                  </label>
+                  <input type="text" class="form-control" name="flag" required placeholder="flag{...}">
+                </div>
+                <div class="col-md-4">
+                  <label>
+                    &nbsp;<br>
+                    <small class="form-text text-muted">&nbsp;</small>
+                  </label>
+                  <select class="form-control custom-select" name="flag_data">
+                    <option value="">Case Sensitive</option>
+                    <option value="case_insensitive">Case Insensitive</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Unlock Time (Scheduled Drop) -->
+            <div class="form-group">
+              <label>
+                Unlock Date & Time (Optional):<br>
+                <small class="form-text text-muted">Leave empty to unlock immediately, or pick a date/time to schedule drop</small>
+              </label>
+              <input type="datetime-local" step="1" class="form-control" name="scheduled_at">
+            </div>
+
+            <!-- Message / Description -->
+            <div class="form-group">
+              <label>
+                Message / Description:<br>
+                <small class="form-text text-muted">Use this to give instructions, endpoints, and clues</small>
+              </label>
+              <textarea class="form-control" name="description" rows="6" placeholder="Enter challenge description..."></textarea>
+            </div>
+
+            <!-- Target Instance Sandbox -->
+            <div class="card mb-3">
+              <div class="card-body py-2">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="checkbox" id="pageSandboxToggle" name="sandbox_enabled" onchange="updateSandboxPageStatus()">
+                    <label class="form-check-label font-weight-bold cursor-pointer" for="pageSandboxToggle">
+                      Enable Target Instance Sandbox (Live Service / Container)
+                    </label>
+                  </div>
+                  <span id="pageSandboxBadge" class="badge badge-secondary">DISABLED</span>
+                </div>
+                <div id="pageSandboxContainer" class="mt-2 d-none">
+                  <label class="small text-muted mb-1">Container Endpoint / Connection Command:</label>
+                  <input type="text" class="form-control" name="connection_info" id="pageConnectionInfo" placeholder="e.g. nc instance.ctf.local 1337 or http://sandbox.challenge.local:8080">
+                  <small class="form-text text-muted">Participants will see this connection endpoint on the challenge modal.</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Attachments & Google Drive Links -->
+            <div class="card mb-3">
+              <div class="card-header py-2 d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                  <strong>Challenge Attachments & Google Drive Links</strong> (<span id="pageAttachCount">0</span>)
+                  <br><small class="text-muted">Attach files or paste Google Drive / external links</small>
+                </div>
+                <div class="btn-group mt-1">
+                  <button type="button" class="btn btn-sm btn-outline-info" onclick="promptAddPageGDriveLink()">
+                    <i class="fab fa-google-drive"></i> Add Google Drive Link
+                  </button>
+                  <label class="btn btn-sm btn-outline-secondary mb-0 cursor-pointer ml-1">
+                    <i class="fas fa-file-upload"></i> Upload File
+                    <input type="file" id="pageFilesInput" name="files" multiple class="d-none" onchange="handlePageFileSelect(this)">
+                  </label>
+                </div>
+              </div>
+              <div class="card-body py-2">
+                <div id="pageEmptyAttachText" class="text-muted small text-center py-2">
+                  No files or Google Drive links attached.
+                </div>
+                <div id="pageAttachedList" class="list-group list-group-flush"></div>
+              </div>
+            </div>
+
+            <div id="pageGDriveInputsContainer"></div>
+
+            <div class="form-group clearfix pt-2">
+              <a href="{{ url_for('admin.challenges_listing') }}" class="btn btn-secondary float-left">Cancel</a>
+              <button type="submit" id="pageSaveChalBtn" class="btn btn-primary float-right">
+                <span id="pageSaveBtnText">Create Challenge</span>
+                <span id="pageSaveSpinner" class="spinner-border spinner-border-sm d-none ml-1" role="status" aria-hidden="true"></span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="container-fluid">
-	<div class="row">
-		<div class="col-md-3 offset-md-1">
-			<h5 class="text-center pb-3">
-				Challenge Types
-			</h5>
-			<div id="create-chals-select">
-				{% for type in types %}
-				<label class="w-100">
-					<input type="radio" name="type" class="card-radio d-none" value="{{ type }}" {% if type == "standard" %}checked{% endif %}/>
-					<div class="card rounded-0">
-						<div class="card-body">
-							<span class="card-title">
-								<div class="form-check">
-									<input class="form-check-input card-radio-clone" type="radio" style="visibility: hidden;" checked>
-									<span class="form-check-label">{{ type }}</span>
-								</div>
-							</span>
-						</div>
-					</div>
-				</label>
-				{% endfor %}
-			</div>
-		</div>
-		<div class="col-md-7">
-			<div id="create-chal-entry-div">
-			</div>
-		</div>
-	</div>
-</div>
+<script>
+let pageAttachedGDriveLinks = [];
+let pageAttachedFiles = [];
 
-{% endblock %}
+function toggleCustomCategoryPage(sel) {
+  const customInput = document.getElementById('pageCustomCategory');
+  if (sel.value === 'Custom') {
+    customInput.classList.remove('d-none');
+    customInput.focus();
+  } else {
+    customInput.classList.add('d-none');
+  }
+}
 
-{% block scripts %}
-{% endblock %}
+function toggleCustomTrackPage(sel) {
+  const customInput = document.getElementById('pageCustomTrack');
+  if (sel.value === 'Custom') {
+    customInput.classList.remove('d-none');
+    customInput.focus();
+  } else {
+    customInput.classList.add('d-none');
+  }
+}
 
-{% block entrypoint %}
-	{{ Assets.js("assets/js/pages/challenge.js", theme="admin") }}
+function updateSandboxPageStatus() {
+  const chk = document.getElementById('pageSandboxToggle');
+  const badge = document.getElementById('pageSandboxBadge');
+  const container = document.getElementById('pageSandboxContainer');
+  if (chk.checked) {
+    badge.textContent = 'ENABLED';
+    badge.className = 'badge badge-success';
+    container.classList.remove('d-none');
+  } else {
+    badge.textContent = 'DISABLED';
+    badge.className = 'badge badge-secondary';
+    container.classList.add('d-none');
+  }
+}
+
+function promptAddPageGDriveLink() {
+  const link = prompt('Enter Google Drive / External URL:');
+  if (!link || !link.trim()) return;
+  const name = prompt('Enter Display Name (e.g. final.jpg, Challenge Drive):', 'Google Drive Link') || 'Google Drive Link';
+  
+  pageAttachedGDriveLinks.push({ name: name.trim(), url: link.trim() });
+  renderPageAttachedItems();
+}
+
+function handlePageFileSelect(input) {
+  if (input.files) {
+    for (let i = 0; i < input.files.length; i++) {
+      pageAttachedFiles.push(input.files[i]);
+    }
+  }
+  renderPageAttachedItems();
+}
+
+function removePageGDriveLink(idx) {
+  pageAttachedGDriveLinks.splice(idx, 1);
+  renderPageAttachedItems();
+}
+
+function removePageFileItem(idx) {
+  pageAttachedFiles.splice(idx, 1);
+  renderPageAttachedItems();
+}
+
+function renderPageAttachedItems() {
+  const container = document.getElementById('pageAttachedList');
+  const emptyText = document.getElementById('pageEmptyAttachText');
+  const countSpan = document.getElementById('pageAttachCount');
+  const gdriveInputs = document.getElementById('pageGDriveInputsContainer');
+  
+  const totalCount = pageAttachedGDriveLinks.length + pageAttachedFiles.length;
+  countSpan.textContent = totalCount;
+  
+  if (totalCount === 0) {
+    emptyText.classList.remove('d-none');
+    container.innerHTML = '';
+    gdriveInputs.innerHTML = '';
+    return;
+  }
+  
+  emptyText.classList.add('d-none');
+  let html = '';
+  let inputsHtml = '';
+
+  pageAttachedGDriveLinks.forEach((item, idx) => {
+    html += `
+      <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+        <div>
+          <i class="fab fa-google-drive text-info mr-2"></i>
+          <strong>${item.name}</strong>
+          <a href="${item.url}" target="_blank" class="small text-muted ml-2 text-truncate d-inline-block" style="max-width: 320px;">(${item.url})</a>
+        </div>
+        <button type="button" class="btn btn-sm text-danger p-0 border-0" onclick="removePageGDriveLink(${idx})" title="Remove link">&times;</button>
+      </div>
+    `;
+    inputsHtml += `<input type="hidden" name="gdrive_links[]" value="${item.url}">`;
+    inputsHtml += `<input type="hidden" name="gdrive_names[]" value="${item.name}">`;
+  });
+
+  pageAttachedFiles.forEach((file, idx) => {
+    const sizeKb = (file.size / 1024).toFixed(1);
+    html += `
+      <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+        <div>
+          <i class="fas fa-file-alt text-secondary mr-2"></i>
+          <strong>${file.name}</strong>
+          <span class="small text-muted ml-2">(${sizeKb} KB)</span>
+        </div>
+        <button type="button" class="btn btn-sm text-danger p-0 border-0" onclick="removePageFileItem(${idx})" title="Remove file">&times;</button>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+  gdriveInputs.innerHTML = inputsHtml;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('createChallengePageForm');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      const saveBtn = document.getElementById('pageSaveChalBtn');
+      const spinner = document.getElementById('pageSaveSpinner');
+      const btnText = document.getElementById('pageSaveBtnText');
+      
+      saveBtn.disabled = true;
+      spinner.classList.remove('d-none');
+      btnText.textContent = 'Creating...';
+    });
+  }
+});
+</script>
 {% endblock %}

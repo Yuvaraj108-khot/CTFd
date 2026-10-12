@@ -16,7 +16,7 @@
 			'urlRoot': "{{ request.script_root }}",
 			'csrfNonce': "{{ Session.nonce }}",
 			'userMode': "{{ Configs.user_mode }}",
-			'userId': {{ Session.id }},
+			'userId': {{ Session.id | tojson }},
 			'userName': {{ User.name | tojson }},
 			'userEmail': {{ User.email | tojson }},
 			'teamId': {{ Team.id | tojson }}, 
@@ -40,7 +40,12 @@
 <body>
 	<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
 		<div class="container">
-			<a href="{{ url_for('views.static_html', route='/') }}" class="navbar-brand">CTFd</a>
+			<a href="{{ url_for('views.static_html', route='/') }}" class="navbar-brand d-inline-flex align-items-center py-1">
+				<div class="d-inline-flex align-items-center bg-white rounded-pill px-2 py-1 mr-2 shadow-sm">
+					<img src="{{ url_for('views.themes', path='img/logo_acm.png') }}" alt="ACM" height="26" style="max-width: 36px; object-fit: contain;">
+				</div>
+				<span class="font-weight-bold">ACM CTF Admin</span>
+			</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#base-navbars"
 					aria-controls="base-navbars" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
@@ -74,6 +79,7 @@
 							<a class="dropdown-item" href="{{ url_for('admin.submissions_listing', submission_type='incorrect') }}">Incorrect Submissions</a>
 						</div>
 					</li>
+					<li class="nav-item"><a class="nav-link" href="{{ url_for('admin.event_schedule') }}"><i class="fas fa-clock mr-1"></i>Schedule</a></li>
 					<li class="nav-item"><a class="nav-link" href="{{ url_for('admin.config') }}">Config</a></li>
 
 					{% set plugin_menu = get_admin_plugin_menu_bar() %}
@@ -137,13 +143,8 @@
 
 	<footer class="footer pt-2">
 		<div class="container text-center">
-			<a href="https://ctfd.io" class="text-secondary">
-				<small class="text-muted">
-					Powered by CTFd
-				</small>
-			</a>
 			<span>
-				<small class="text-muted"><br> Version {{ get_config('ctf_version') }}</small>
+				<small class="text-muted">Version {{ get_config('ctf_version') }}</small>
 			</span>
 		</div>
 	</footer>

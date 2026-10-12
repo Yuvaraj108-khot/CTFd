@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--port", help="Port for debug server to listen on", default=4000)
@@ -10,8 +11,20 @@ parser.add_argument(
     help="Disable importing gevent and monkey patching",
     action="store_false",
 )
+parser.add_argument(
+    "--no-waitress",
+    help="Do not use Waitress WSGI server; use built-in Werkzeug server instead",
+    action="store_true",
+)
 args = parser.parse_args()
-if args.disable_gevent:
+
+use_waitress = not args.no_waitress and not args.profile
+try:
+    import waitress
+except ImportError:
+    use_waitress = False
+
+if not use_waitress and args.disable_gevent:
     print(" * Importing gevent and monkey patching. Use --disable-gevent to disable.")
     from gevent import monkey
 
@@ -40,4 +53,9 @@ if args.profile:
     toolbar.init_app(app)
     print(" * Flask profiling running at http://127.0.0.1:4000/flask-profiler/")
 
-app.run(debug=True, threaded=True, host="127.0.0.1", port=args.port)
+if use_waitress:
+    print(f" * Serving CTFd with Waitress (multi-threaded, 16 workers) at http://127.0.0.1:{args.port}")
+    waitress.serve(app, host="127.0.0.1", port=args.port, threads=16, connection_limit=100)
+else:
+    app.run(debug=True, threaded=True, host="127.0.0.1", port=args.port)
+

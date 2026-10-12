@@ -1,0 +1,480 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="jumbotron">
+	<div class="container">
+		<h1>Event Schedule & Timer</h1>
+	</div>
+</div>
+
+<div class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<div id="schedule-alert-box"></div>
+		</div>
+	</div>
+
+	<!-- Event Status and Quick Timer -->
+	<div class="row mb-4">
+		<div class="col-md-12">
+			<div class="card">
+				<div class="card-header font-weight-bold d-flex justify-content-between align-items-center">
+					<span>Competition Timer</span>
+					<span id="current-status-badge" class="badge badge-{% if event.status == 'paused' %}warning{% elif event.status == 'ended' %}danger{% elif event.status == 'upcoming' %}info{% else %}success{% endif %} p-2" style="font-size: 0.9rem;">
+						{{ event.status | upper }}
+					</span>
+				</div>
+				<div class="card-body">
+					<div class="row text-center mb-4">
+						<div class="col-md-12">
+							<h5 class="text-muted mb-2">Time Remaining</h5>
+							<h1 class="display-3 font-weight-bold text-primary font-monospace" id="live-timer-clock">00:00:00</h1>
+							<p class="text-muted small">Server Time (UTC): <span id="server-utc-text">--</span> | Your Local Time: <span id="admin-local-text">--</span></p>
+						</div>
+					</div>
+
+					<!-- Set Exact Countdown Duration Card -->
+					<div class="card bg-light border mb-4">
+						<div class="card-body">
+							<h5 class="font-weight-bold text-dark mb-1">SET EXACT COUNTDOWN DURATION</h5>
+							<p class="text-muted small mb-3">Input custom hours, minutes, and seconds to set the countdown clock.</p>
+							
+							<div class="form-row mb-3">
+								<div class="col-md-4 col-sm-4 mb-2">
+									<label class="font-weight-bold small text-muted">Hours</label>
+									<input type="number" id="custom-duration-hours" class="form-control" min="0" value="3">
+								</div>
+								<div class="col-md-4 col-sm-4 mb-2">
+									<label class="font-weight-bold small text-muted">Minutes</label>
+									<input type="number" id="custom-duration-minutes" class="form-control" min="0" max="59" value="0">
+								</div>
+								<div class="col-md-4 col-sm-4 mb-2">
+									<label class="font-weight-bold small text-muted">Seconds</label>
+									<input type="number" id="custom-duration-seconds" class="form-control" min="0" max="59" value="0">
+								</div>
+							</div>
+
+
+							<button type="button" class="btn btn-primary font-weight-bold px-4" onclick="applyCustomDurationTimer()">
+								<i class="fas fa-play mr-1"></i> Apply Custom Timer
+							</button>
+						</div>
+					</div>
+
+					<div class="row mb-3">
+						<div class="col-md-12 text-center">
+							<span class="font-weight-bold mr-2">Quick Duration Presets:</span>
+							<button type="button" class="btn btn-outline-primary btn-sm mr-1 mb-1" onclick="quickSetHours(1)">1 Hour</button>
+							<button type="button" class="btn btn-outline-primary btn-sm mr-1 mb-1" onclick="quickSetHours(2)">2 Hours</button>
+							<button type="button" class="btn btn-outline-primary btn-sm mr-1 mb-1" onclick="quickSetHours(3)">3 Hours</button>
+							<button type="button" class="btn btn-outline-primary btn-sm mr-1 mb-1" onclick="quickSetHours(6)">6 Hours</button>
+							<button type="button" class="btn btn-outline-primary btn-sm mr-1 mb-1" onclick="quickSetHours(12)">12 Hours</button>
+							<button type="button" class="btn btn-outline-primary btn-sm mr-1 mb-1" onclick="quickSetHours(24)">24 Hours</button>
+							<button type="button" class="btn btn-outline-success btn-sm mr-1 mb-1" onclick="quickAdjustMinutes(30)">+30 Mins</button>
+							<button type="button" class="btn btn-outline-success btn-sm mr-1 mb-1" onclick="quickAdjustMinutes(60)">+1 Hour</button>
+						</div>
+					</div>
+
+					<hr>
+
+					<!-- Simple Form to Set Exact Time -->
+					<form id="simple-schedule-form" onsubmit="event.preventDefault(); saveEventTimings();">
+						<div class="form-row">
+							<div class="form-group col-md-4">
+								<label for="event-start-input" class="font-weight-bold">Start Time:</label>
+								<input type="datetime-local" step="1" id="event-start-input" class="form-control">
+								<small class="form-text text-muted">When event begins (local time).</small>
+							</div>
+
+							<div class="form-group col-md-4">
+								<label for="event-freeze-input" class="font-weight-bold text-primary">Scoreboard Freeze Time (Optional):</label>
+								<input type="datetime-local" step="1" id="event-freeze-input" class="form-control">
+								<small class="form-text text-muted">Freezes leaderboard for normal users. Admins always see real-time updates every second.</small>
+							</div>
+
+							<div class="form-group col-md-4">
+								<label for="event-end-input" class="font-weight-bold">End Time:</label>
+								<input type="datetime-local" step="1" id="event-end-input" class="form-control">
+								<small class="form-text text-muted">When submissions automatically close.</small>
+							</div>
+						</div>
+
+						<div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+							<div>
+								<button type="button" class="btn btn-{% if event.is_paused %}success{% else %}warning{% endif %} mr-2" onclick="togglePauseEvent()">
+									{% if event.is_paused %}
+										<i class="fas fa-play mr-1"></i> Resume Event
+									{% else %}
+										<i class="fas fa-pause mr-1"></i> Pause Event
+									{% endif %}
+								</button>
+								<button type="button" class="btn btn-outline-danger" onclick="expireEventImmediately()">
+									<i class="fas fa-stop mr-1"></i> End Event Now
+								</button>
+							</div>
+							<div>
+								<button type="submit" class="btn btn-primary btn-lg font-weight-bold px-4">
+									<i class="fas fa-save mr-1"></i> Save & Update Time
+								</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Challenge Unlock Times -->
+	<div class="row mb-4">
+		<div class="col-md-12">
+			<div class="card">
+				<div class="card-header font-weight-bold d-flex justify-content-between align-items-center">
+					<span>Question Unlock Schedule</span>
+					<button type="button" class="btn btn-success btn-sm font-weight-bold" onclick="saveChallengeDrops()">
+						<i class="fas fa-save mr-1"></i> Save Question Unlock Times
+					</button>
+				</div>
+				<div class="card-body">
+					<p class="text-muted small">
+						Set an unlock date and time for any challenge. When that time arrives, the question automatically unlocks for users without requiring a page refresh. Leave blank for immediately unlocked questions.
+					</p>
+
+					<div class="table-responsive">
+						<table class="table table-striped table-bordered">
+							<thead class="thead-light">
+								<tr>
+									<th style="width: 50px;">ID</th>
+									<th>Question Name</th>
+									<th>Category</th>
+									<th>Points</th>
+									<th>Current Status</th>
+									<th style="width: 320px;">Unlock Time (Local)</th>
+									<th style="width: 80px;">Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for chal in challenges %}
+								<tr>
+									<td>{{ chal.id }}</td>
+									<td class="font-weight-bold">{{ chal.name }}</td>
+									<td><span class="badge badge-secondary">{{ chal.category }}</span></td>
+									<td>{{ chal.value }}</td>
+									<td>
+										{% if chal.is_locked %}
+											<span class="badge badge-warning">Locked (in {{ chal.unlock_in_seconds // 60 }}m)</span>
+										{% else %}
+											<span class="badge badge-success">Unlocked</span>
+										{% endif %}
+									</td>
+									<td>
+										<input type="datetime-local" step="1"
+											   class="form-control form-control-sm chal-time-input"
+											   data-id="{{ chal.id }}"
+											   data-original="{{ chal.scheduled_at or '' }}">
+									</td>
+									<td>
+										<button type="button" class="btn btn-outline-danger btn-sm" data-id="{{ chal.id }}" onclick="clearChalTime(this.dataset.id)">
+											Clear
+										</button>
+									</td>
+								</tr>
+								{% else %}
+								<tr>
+									<td colspan="7" class="text-center text-muted py-4">No challenges found. Create questions first under the Challenges tab.</td>
+								</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+
+					<div class="text-right mt-3">
+						<button type="button" class="btn btn-success font-weight-bold px-4" onclick="saveChallengeDrops()">
+							<i class="fas fa-save mr-1"></i> Save Question Unlock Times
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="application/json" id="event-data-json">
+{{ event | tojson }}
+</script>
+<script>
+let eventData = JSON.parse(document.getElementById('event-data-json').textContent);
+const csrfToken = "{{ Session.nonce }}";
+
+// Convert UTC ISO to Local string for datetime-local input
+function isoToLocal(isoStr) {
+	if (!isoStr) return "";
+	const d = new Date(isoStr);
+	if (isNaN(d.getTime())) return "";
+	const Y = d.getFullYear();
+	const M = String(d.getMonth() + 1).padStart(2, '0');
+	const D = String(d.getDate()).padStart(2, '0');
+	const h = String(d.getHours()).padStart(2, '0');
+	const m = String(d.getMinutes()).padStart(2, '0');
+	const s = String(d.getSeconds()).padStart(2, '0');
+	return `${Y}-${M}-${D}T${h}:${m}:${s}`;
+}
+
+// Convert Local string to UTC ISO
+function localToIso(localStr) {
+	if (!localStr) return null;
+	const d = new Date(localStr);
+	if (isNaN(d.getTime())) return null;
+	return d.toISOString();
+}
+
+function showMsg(msg, isSuccess = true) {
+	const box = document.getElementById('schedule-alert-box');
+	box.innerHTML = `
+		<div class="alert alert-${isSuccess ? 'success' : 'danger'} alert-dismissible fade show" role="alert">
+			${msg}
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+		</div>
+	`;
+	window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function initPage() {
+	if (eventData.start_iso) {
+		document.getElementById('event-start-input').value = isoToLocal(eventData.start_iso);
+	}
+	if (eventData.end_iso) {
+		document.getElementById('event-end-input').value = isoToLocal(eventData.end_iso);
+	}
+	if (eventData.freeze_iso) {
+		document.getElementById('event-freeze-input').value = isoToLocal(eventData.freeze_iso);
+	}
+
+	document.querySelectorAll('.chal-time-input').forEach(input => {
+		const orig = input.dataset.original;
+		if (orig) {
+			input.value = isoToLocal(orig);
+		}
+	});
+
+	document.querySelectorAll('.log-timestamp').forEach(el => {
+		const utc = el.dataset.utc;
+		if (utc) {
+			const d = new Date(utc);
+			if (!isNaN(d.getTime())) {
+				el.innerText = d.toLocaleString();
+			}
+		}
+	});
+}
+
+function updateClock() {
+	const now = Math.floor(Date.now() / 1000);
+	const nowObj = new Date();
+	document.getElementById('server-utc-text').innerText = nowObj.toUTCString().slice(17, 25);
+	document.getElementById('admin-local-text').innerText = nowObj.toLocaleTimeString();
+
+	let secs = 0;
+	if (eventData.status === 'paused') {
+		secs = eventData.time_remaining_seconds || 0;
+	} else if (eventData.end) {
+		secs = Math.max(0, eventData.end - now);
+	}
+
+	const H = String(Math.floor(secs / 3600)).padStart(2, '0');
+	const M = String(Math.floor((secs % 3600) / 60)).padStart(2, '0');
+	const S = String(secs % 60).padStart(2, '0');
+	document.getElementById('live-timer-clock').innerText = `${H}:${M}:${S}`;
+}
+
+// Custom Duration & Wave Auto-alignment
+async function applyCustomDurationTimer() {
+	const h = parseInt(document.getElementById('custom-duration-hours').value) || 0;
+	const m = parseInt(document.getElementById('custom-duration-minutes').value) || 0;
+	const s = parseInt(document.getElementById('custom-duration-seconds').value) || 0;
+	const totalSecs = (h * 3600) + (m * 60) + s;
+
+	if (totalSecs <= 0) {
+		showMsg("Please enter a valid duration greater than 0 seconds.", false);
+		return;
+	}
+
+	const now = new Date();
+	const end = new Date(now.getTime() + (totalSecs * 1000));
+	const startIso = now.toISOString();
+	const endIso = end.toISOString();
+
+	document.getElementById('event-start-input').value = isoToLocal(startIso);
+	document.getElementById('event-end-input').value = isoToLocal(endIso);
+
+	try {
+		const res = await fetch('/api/v1/schedule/event', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+			body: JSON.stringify({ start: startIso, end: endIso })
+		});
+		const json = await res.json();
+		if (json.success) {
+			showMsg(`Competition timer set for ${h}h ${m}m ${s}s!`);
+			setTimeout(() => location.reload(), 1000);
+		} else {
+			showMsg(json.errors ? Object.values(json.errors).join(', ') : 'Failed to set duration.', false);
+		}
+	} catch (e) {
+		showMsg(e.message, false);
+	}
+}
+
+// Quick presets
+function quickSetHours(hours) {
+	const now = new Date();
+	const end = new Date(now.getTime() + (hours * 3600 * 1000));
+	document.getElementById('event-start-input').value = isoToLocal(now.toISOString());
+	document.getElementById('event-end-input').value = isoToLocal(end.toISOString());
+	saveEventTimings();
+}
+
+async function quickAdjustMinutes(mins) {
+	try {
+		const res = await fetch('/api/v1/schedule/quick-adjust', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+			body: JSON.stringify({ seconds: mins * 60 })
+		});
+		const json = await res.json();
+		if (json.success) {
+			showMsg(json.message);
+			setTimeout(() => location.reload(), 1000);
+		} else {
+			showMsg(json.errors ? Object.values(json.errors).join(', ') : 'Failed', false);
+		}
+	} catch (e) {
+		showMsg(e.message, false);
+	}
+}
+
+async function saveEventTimings() {
+	const startLocal = document.getElementById('event-start-input').value;
+	const endLocal = document.getElementById('event-end-input').value;
+	const freezeLocal = document.getElementById('event-freeze-input').value;
+
+	const startIso = localToIso(startLocal);
+	const endIso = localToIso(endLocal);
+	const freezeIso = localToIso(freezeLocal);
+
+	if (startIso && endIso && new Date(endIso) <= new Date(startIso)) {
+		showMsg("End time must be after start time.", false);
+		return;
+	}
+
+	if (freezeIso) {
+		if (startIso && new Date(freezeIso) < new Date(startIso)) {
+			showMsg("Score freeze time cannot be before event start time.", false);
+			return;
+		}
+		if (endIso && new Date(freezeIso) > new Date(endIso)) {
+			showMsg("Score freeze time cannot be after event end time.", false);
+			return;
+		}
+	}
+
+	try {
+		const res = await fetch('/api/v1/schedule/event', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+			body: JSON.stringify({
+				start: startIso,
+				end: endIso,
+				freeze: freezeIso
+			})
+		});
+		const json = await res.json();
+		if (json.success) {
+			showMsg("Competition schedule updated successfully!");
+			setTimeout(() => location.reload(), 1000);
+		} else {
+			showMsg(json.errors ? Object.values(json.errors).join(', ') : 'Failed to update timing.', false);
+		}
+	} catch (e) {
+		showMsg(e.message, false);
+	}
+}
+
+async function togglePauseEvent() {
+	const action = eventData.is_paused ? 'resume' : 'pause';
+	try {
+		const res = await fetch('/api/v1/schedule/pause', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+			body: JSON.stringify({ action: action, extend_end_time: true })
+		});
+		const json = await res.json();
+		if (json.success) {
+			showMsg(json.message);
+			setTimeout(() => location.reload(), 1000);
+		}
+	} catch (e) {
+		showMsg(e.message, false);
+	}
+}
+
+async function expireEventImmediately() {
+	if (confirm("Are you sure you want to end the event immediately? Submissions will close.")) {
+		try {
+			const res = await fetch('/api/v1/schedule/quick-adjust', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+				body: JSON.stringify({ action: 'expire' })
+			});
+			const json = await res.json();
+			if (json.success) {
+				showMsg("Event ended.");
+				setTimeout(() => location.reload(), 1000);
+			}
+		} catch (e) {
+			showMsg(e.message, false);
+		}
+	}
+}
+
+function clearChalTime(id) {
+	const input = document.querySelector(`.chal-time-input[data-id="${id}"]`);
+	if (input) input.value = '';
+}
+
+async function saveChallengeDrops() {
+	const list = [];
+	document.querySelectorAll('.chal-time-input').forEach(input => {
+		const id = parseInt(input.dataset.id);
+		const val = input.value;
+		list.push({
+			id: id,
+			scheduled_at: localToIso(val)
+		});
+	});
+
+	try {
+		const res = await fetch('/api/v1/schedule/challenges', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+			body: JSON.stringify({ mode: 'individual', challenges: list })
+		});
+		const json = await res.json();
+		if (json.success) {
+			showMsg("Question unlock times saved successfully!");
+			setTimeout(() => location.reload(), 1000);
+		} else {
+			showMsg("Failed to save unlock times.", false);
+		}
+	} catch (e) {
+		showMsg(e.message, false);
+	}
+}
+
+initPage();
+updateClock();
+setInterval(updateClock, 1000);
+</script>
+{% endblock %}

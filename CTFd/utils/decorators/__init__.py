@@ -24,20 +24,38 @@ def during_ctf_time_only(f):
             return f(*args, **kwargs)
         else:
             if ctf_ended():
-                if view_after_ctf():
+                if view_after_ctf() or request.endpoint == "challenges.listing":
                     return f(*args, **kwargs)
                 else:
                     error = gettext(
                         "%(ctf_name)s has ended", ctf_name=config.ctf_name()
                     )
+                    if request.path.startswith("/api/") or request.is_json:
+                        return (
+                            {
+                                "success": False,
+                                "data": {"status": "ended", "message": error},
+                            },
+                            403,
+                        )
                     abort(403, description=error)
             if ctf_started() is False:
+                if request.endpoint == "challenges.listing":
+                    return f(*args, **kwargs)
                 if is_teams_mode() and get_current_team() is None:
                     return redirect(url_for("teams.private", next=request.full_path))
                 else:
                     error = gettext(
                         "%(ctf_name)s has not started yet", ctf_name=config.ctf_name()
                     )
+                    if request.path.startswith("/api/") or request.is_json:
+                        return (
+                            {
+                                "success": False,
+                                "data": {"status": "not_started", "message": error},
+                            },
+                            403,
+                        )
                     abort(403, description=error)
 
     return during_ctf_time_only_wrapper
@@ -206,7 +224,7 @@ def require_complete_profile(f):
                 if user.filled_all_required_fields is False:
                     info_for(
                         "views.settings",
-                        "Please fill out all required profile fields before continuing",
+                        "Please complete your mandatory profile details (Name, USN, College Email, Year of Study, and Department) before proceeding to team creation or joining.",
                     )
                     return redirect(url_for("views.settings"))
 

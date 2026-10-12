@@ -135,8 +135,18 @@ def clear_standings():
     from CTFd.api.v1.scoreboard import ScoreboardDetail, ScoreboardList
     from CTFd.constants.static import CacheKeys
     from CTFd.models import Teams, Users  # noqa: I001
-    from CTFd.utils.scoreboard import get_scoreboard_detail
-    from CTFd.utils.scores import get_standings, get_team_standings, get_user_standings
+    from CTFd.utils.scoreboard import (
+        _cached_get_scoreboard_detail,
+        get_scoreboard_detail,
+    )
+    from CTFd.utils.scores import (
+        _cached_get_standings,
+        _cached_get_team_standings,
+        _cached_get_user_standings,
+        get_standings,
+        get_team_standings,
+        get_user_standings,
+    )
     from CTFd.utils.user import (
         get_team_place,
         get_team_schema,
@@ -151,6 +161,10 @@ def clear_standings():
     cache.delete_memoized(get_team_standings)
     cache.delete_memoized(get_user_standings)
     cache.delete_memoized(get_scoreboard_detail)
+    cache.delete_memoized(_cached_get_standings)
+    cache.delete_memoized(_cached_get_team_standings)
+    cache.delete_memoized(_cached_get_user_standings)
+    cache.delete_memoized(_cached_get_scoreboard_detail)
 
     # Clear out the individual helpers for accessing score via the model
     cache.delete_memoized(Users.get_score)

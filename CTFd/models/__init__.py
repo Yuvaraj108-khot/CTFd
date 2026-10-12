@@ -423,6 +423,13 @@ class Users(db.Model):
     language = db.Column(db.String(32), nullable=True, default=None)
     change_password = db.Column(db.Boolean, default=False)
 
+    # Student Profile Details
+    usn = db.Column(db.String(64), nullable=True)
+    college_email = db.Column(db.String(128), nullable=True)
+    year_of_study = db.Column(db.String(32), nullable=True)
+    department = db.Column(db.String(128), nullable=True)
+    profile_completed = db.Column(db.Boolean, default=False)
+
     # Relationship for Teams
     team_id = db.Column(db.Integer, db.ForeignKey("teams.id"))
 
@@ -505,24 +512,16 @@ class Users(db.Model):
 
     @property
     def filled_all_required_fields(self):
-        required_user_fields = {
-            u.id
-            for u in UserFields.query.with_entities(UserFields.id)
-            .filter_by(required=True)
-            .all()
-        }
-        submitted_user_fields = {
-            u.field_id
-            for u in UserFieldEntries.query.with_entities(UserFieldEntries.field_id)
-            .filter_by(user_id=self.id)
-            .all()
-        }
-        # Require that users select a bracket
-        missing_bracket = (
-            Brackets.query.filter_by(type="users").count()
-            and self.bracket_id is not None
+        if self.type == "admin":
+            return True
+        return bool(
+            self.name and str(self.name).strip() and
+            self.usn and str(self.usn).strip() and
+            self.college_email and str(self.college_email).strip() and
+            self.year_of_study and str(self.year_of_study).strip() and
+            self.department and str(self.department).strip() and
+            self.profile_completed
         )
-        return required_user_fields.issubset(submitted_user_fields) and missing_bracket
 
     def get_fields(self, admin=False):
         if admin:
@@ -1040,6 +1039,22 @@ class Configs(db.Model):
 
     def __init__(self, *args, **kwargs):
         super(Configs, self).__init__(**kwargs)
+
+
+class ScheduleAuditLogs(db.Model):
+    __tablename__ = "schedule_audit_logs"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    user_name = db.Column(db.String(128))
+    ip = db.Column(db.String(46))
+    action = db.Column(db.String(64), nullable=False)
+    details = db.Column(db.JSON)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+    user = db.relationship("Users", foreign_keys="ScheduleAuditLogs.user_id", lazy="select")
+
+    def __init__(self, *args, **kwargs):
+        super(ScheduleAuditLogs, self).__init__(**kwargs)
 
 
 class Tokens(db.Model):

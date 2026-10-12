@@ -14,6 +14,7 @@ from CTFd.utils.decorators.visibility import (
 from CTFd.utils.modes import TEAMS_MODE, generate_account_url, get_mode_as_word
 from CTFd.utils.scoreboard import get_scoreboard_detail
 from CTFd.utils.scores import get_standings, get_user_standings
+from CTFd.utils.user import is_admin
 
 scoreboard_namespace = Namespace(
     "scoreboard", description="Endpoint to retrieve scores"
@@ -24,9 +25,10 @@ scoreboard_namespace = Namespace(
 class ScoreboardList(Resource):
     @check_account_visibility
     @check_score_visibility
-    @cache.cached(timeout=60, key_prefix=make_cache_key)
+    @cache.cached(timeout=60, key_prefix=make_cache_key, unless=is_admin)
     def get(self):
-        standings = get_standings()
+        admin = is_admin()
+        standings = get_standings(admin=admin)
         response = []
         mode = get_config("user_mode")
         account_type = get_mode_as_word()
@@ -62,9 +64,10 @@ class ScoreboardList(Resource):
                     }
 
             # Get user_standings as a dict so that we can more quickly get member scores
-            user_standings = get_user_standings()
+            user_standings = get_user_standings(admin=admin)
             for u in user_standings:
-                membership[u.team_id][u.user_id]["score"] = int(u.score)
+                if u.team_id in membership and u.user_id in membership[u.team_id]:
+                    membership[u.team_id][u.user_id]["score"] = int(u.score)
 
         for i, x in enumerate(standings):
             entry = {
@@ -95,5 +98,6 @@ class ScoreboardDetail(Resource):
         # Restrict count to some limit
         count = max(1, min(count, 50))
         bracket_id = request.args.get("bracket_id")
-        response = get_scoreboard_detail(count=count, bracket_id=bracket_id)
+        admin = is_admin()
+        response = get_scoreboard_detail(count=count, bracket_id=bracket_id, admin=admin)
         return {"success": True, "data": response}
