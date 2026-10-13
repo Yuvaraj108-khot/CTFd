@@ -18,9 +18,9 @@
 	<div class="row mb-4">
 		<div class="col-md-12">
 			<div class="card">
-				<div class="card-header font-weight-bold d-flex justify-content-between align-items-center">
-					<span>Competition Timer</span>
-					<span id="current-status-badge" class="badge badge-{% if event.status == 'paused' %}warning{% elif event.status == 'ended' %}danger{% elif event.status == 'upcoming' %}info{% else %}success{% endif %} p-2" style="font-size: 0.9rem;">
+				<div class="card-header font-weight-bold d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+					<span><i class="fas fa-stopwatch mr-1 text-primary"></i> Competition Timer</span>
+					<span id="current-status-badge" class="badge badge-{% if event.status == 'paused' %}warning{% elif event.status == 'ended' %}danger{% elif event.status == 'upcoming' %}info{% else %}success{% endif %} p-2 mt-1 mt-sm-0" style="font-size: 0.9rem;">
 						{{ event.status | upper }}
 					</span>
 				</div>
@@ -28,7 +28,7 @@
 					<div class="row text-center mb-4">
 						<div class="col-md-12">
 							<h5 class="text-muted mb-2">Time Remaining</h5>
-							<h1 class="display-3 font-weight-bold text-primary font-monospace" id="live-timer-clock">00:00:00</h1>
+							<h1 class="display-3 font-weight-bold text-primary font-monospace" id="live-timer-clock" style="font-size: clamp(2.4rem, 8vw, 4.2rem); word-break: break-all;">00:00:00</h1>
 							<p class="text-muted small">Server Time (UTC): <span id="server-utc-text">--</span> | Your Local Time: <span id="admin-local-text">--</span></p>
 						</div>
 					</div>
@@ -99,9 +99,9 @@
 							</div>
 						</div>
 
-						<div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-							<div>
-								<button type="button" class="btn btn-{% if event.is_paused %}success{% else %}warning{% endif %} mr-2" onclick="togglePauseEvent()">
+						<div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2 mt-3 pt-3 border-top">
+							<div class="mb-2 mb-md-0 d-flex flex-wrap gap-2">
+								<button type="button" class="btn btn-{% if event.is_paused %}success{% else %}warning{% endif %} mr-sm-2 mb-2 mb-sm-0" onclick="togglePauseEvent()">
 									{% if event.is_paused %}
 										<i class="fas fa-play mr-1"></i> Resume Event
 									{% else %}
@@ -113,7 +113,7 @@
 								</button>
 							</div>
 							<div>
-								<button type="submit" class="btn btn-primary btn-lg font-weight-bold px-4">
+								<button type="submit" class="btn btn-primary btn-lg font-weight-bold px-4 w-100 w-md-auto">
 									<i class="fas fa-save mr-1"></i> Save & Update Time
 								</button>
 							</div>
@@ -128,12 +128,12 @@
 	<div class="row mb-4">
 		<div class="col-md-12">
 			<div class="card border-{% if event.scores_hidden_from_users %}warning{% else %}primary{% endif %}">
-				<div class="card-header font-weight-bold d-flex justify-content-between align-items-center bg-{% if event.scores_hidden_from_users %}warning-subtle text-dark{% else %}light{% endif %}">
+				<div class="card-header font-weight-bold d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 bg-{% if event.scores_hidden_from_users %}warning-subtle text-dark{% else %}light{% endif %}">
 					<span>
 						<i class="fas fa-trophy mr-2 text-warning"></i>
 						Scoreboard & Leaderboard Display Control
 					</span>
-					<span id="scoreboard-status-badge" class="badge badge-{% if event.scores_hidden_from_users %}danger{% else %}success{% endif %} p-2" style="font-size: 0.9rem;">
+					<span id="scoreboard-status-badge" class="badge badge-{% if event.scores_hidden_from_users %}danger{% else %}success{% endif %} p-2 mt-1 mt-sm-0" style="font-size: 0.9rem;">
 						{% if event.scores_hidden_from_users %}
 							<i class="fas fa-eye-slash mr-1"></i> HIDDEN FROM PARTICIPANTS
 						{% else %}
@@ -154,7 +154,7 @@
 								Current Visibility Mode: <strong class="text-dark" id="current-visibility-text">{{ event.score_visibility | upper }}</strong>
 							</div>
 						</div>
-						<div class="col-md-4 text-right">
+						<div class="col-md-4 text-center text-md-right mt-3 mt-md-0">
 							<div class="btn-group-vertical w-100" id="scoreboard-visibility-controls">
 								{% if event.scores_hidden_from_users %}
 									<button type="button" class="btn btn-success btn-lg font-weight-bold shadow-sm" onclick="toggleScoreboardVisibility('show')">

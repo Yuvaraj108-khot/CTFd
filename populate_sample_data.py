@@ -108,24 +108,42 @@ with app.app_context():
     # 3. Create realistic Solves across the last 3 hours
     unlocked_chals = [c for c in created_chals if not c.scheduled_at or c.scheduled_at <= now_utc]
 
+    # Clean up stale teams from earlier tests to prevent 10-day timeline gaps
+    active_team_names = [t_info["team_name"] for t_info in team_data]
+    stale_teams = Teams.query.filter(~Teams.name.in_(active_team_names)).all()
+    if stale_teams:
+        stale_team_ids = [t.id for t in stale_teams]
+        Solves.query.filter(Solves.account_id.in_(stale_team_ids)).delete(synchronize_session=False)
+        Awards.query.filter(Awards.account_id.in_(stale_team_ids)).delete(synchronize_session=False)
+        Users.query.filter(Users.team_id.in_(stale_team_ids)).delete(synchronize_session=False)
+        Teams.query.filter(Teams.id.in_(stale_team_ids)).delete(synchronize_session=False)
+        db.session.commit()
+
     solve_count = 0
+    event_start_dt = now_utc - datetime.timedelta(hours=3)
+
     for idx, team in enumerate(created_teams):
         # Pick a random subset of unlocked challenges for each team
         # Team 0 solves most, Team 5 solves fewer to create a dynamic leaderboard ranking
-        sample_size = max(1, len(unlocked_chals) - idx)
+        sample_size = max(2, len(unlocked_chals) - idx)
         team_chals = random.sample(unlocked_chals, min(len(unlocked_chals), sample_size))
 
         team_users = [u for u in created_users if u.team_id == team.id]
         if not team_users:
             continue
 
-        for chal in team_chals:
-            # Check if solve already exists
+        min_offset = 12 + (idx * 5)
+        max_offset = 165 - (idx * 6)
+        timestamps = sorted([
+            random.randint(min_offset, max(min_offset + 10, max_offset))
+            for _ in range(len(team_chals))
+        ])
+
+        for c_idx, chal in enumerate(team_chals):
             existing_solve = Solves.query.filter_by(account_id=team.id, challenge_id=chal.id).first()
             if not existing_solve:
                 user = random.choice(team_users)
-                # Random timestamp between 10 mins and 150 mins ago
-                solve_time = now_utc - datetime.timedelta(minutes=random.randint(10, 150))
+                solve_time = event_start_dt + datetime.timedelta(minutes=timestamps[c_idx])
 
                 solve = Solves(
                     user_id=user.id,

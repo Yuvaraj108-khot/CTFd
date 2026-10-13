@@ -20,7 +20,7 @@
         <p class="text-muted mb-4 lead" style="font-size: 1.05rem;">
           {{ error or "The competition leaderboard and standings have been temporarily hidden by event organizers. Challenges, hints, and flag submissions remain fully active!" }}
         </p>
-        <div class="d-flex justify-content-center gap-2">
+        <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
           <a href="{{ url_for('challenges.listing') }}" class="btn btn-primary px-4 py-2 fw-semibold">
             <i class="fas fa-flag me-1"></i> {% trans %}View Challenges{% endtrans %}
           </a>
