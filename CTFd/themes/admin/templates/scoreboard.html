@@ -7,6 +7,39 @@
 	</div>
 </div>
 <div class="container">
+	<!-- Scoreboard Visibility Controls for Participants -->
+	<div class="row mb-3">
+		<div class="col-md-12">
+			<div class="card bg-light border">
+				<div class="card-body py-2 px-3 d-flex justify-content-between align-items-center">
+					<div class="d-flex align-items-center">
+						<span class="font-weight-bold mr-2"><i class="fas fa-trophy text-warning mr-1"></i> Participant Visibility:</span>
+						{% if Configs.score_visibility in ['hidden', 'admins'] %}
+							<span class="badge badge-danger p-2" id="admin-sc-badge">
+								<i class="fas fa-eye-slash mr-1"></i> HIDDEN FROM PARTICIPANTS
+							</span>
+						{% else %}
+							<span class="badge badge-success p-2" id="admin-sc-badge">
+								<i class="fas fa-eye mr-1"></i> VISIBLE TO PARTICIPANTS
+							</span>
+						{% endif %}
+					</div>
+					<div>
+						{% if Configs.score_visibility in ['hidden', 'admins'] %}
+							<button type="button" class="btn btn-success btn-sm font-weight-bold" onclick="toggleScoreboardVisibility('show')">
+								<i class="fas fa-eye mr-1"></i> Resume Scoreboard for Users
+							</button>
+						{% else %}
+							<button type="button" class="btn btn-warning btn-sm font-weight-bold text-dark" onclick="toggleScoreboardVisibility('hide')">
+								<i class="fas fa-eye-slash mr-1"></i> Stop Displaying for Users
+							</button>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<div class="row">
 		<div class="col-md-12">
 			<div class="float-right pb-3">
@@ -56,6 +89,26 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+async function toggleScoreboardVisibility(action) {
+	try {
+		const res = await fetch('/api/v1/schedule/scoreboard-visibility', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', 'CSRF-Token': init.csrfNonce },
+			body: JSON.stringify({ action: action })
+		});
+		const json = await res.json();
+		if (json.success) {
+			location.reload();
+		} else {
+			alert(json.message || "Failed to update scoreboard visibility.");
+		}
+	} catch (e) {
+		console.error(e);
+		alert("Network error updating scoreboard visibility: " + e.message);
+	}
+}
+</script>
 {% endblock %}
 
 {% block entrypoint %}

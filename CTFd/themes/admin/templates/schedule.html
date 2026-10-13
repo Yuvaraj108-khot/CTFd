@@ -124,6 +124,58 @@
 		</div>
 	</div>
 
+	<!-- Scoreboard & Leaderboard Display Control Card -->
+	<div class="row mb-4">
+		<div class="col-md-12">
+			<div class="card border-{% if event.scores_hidden_from_users %}warning{% else %}primary{% endif %}">
+				<div class="card-header font-weight-bold d-flex justify-content-between align-items-center bg-{% if event.scores_hidden_from_users %}warning-subtle text-dark{% else %}light{% endif %}">
+					<span>
+						<i class="fas fa-trophy mr-2 text-warning"></i>
+						Scoreboard & Leaderboard Display Control
+					</span>
+					<span id="scoreboard-status-badge" class="badge badge-{% if event.scores_hidden_from_users %}danger{% else %}success{% endif %} p-2" style="font-size: 0.9rem;">
+						{% if event.scores_hidden_from_users %}
+							<i class="fas fa-eye-slash mr-1"></i> HIDDEN FROM PARTICIPANTS
+						{% else %}
+							<i class="fas fa-eye mr-1"></i> VISIBLE TO PARTICIPANTS
+						{% endif %}
+					</span>
+				</div>
+				<div class="card-body">
+					<div class="row align-items-center">
+						<div class="col-md-8">
+							<h5 class="font-weight-bold mb-1">Stop or Resume Displaying Leaderboard to Users</h5>
+							<p class="text-muted mb-2">
+								Toggle whether the live scoreboard, ranks, and solved challenges are visible to participants.
+								When stopped, participants cannot access the scoreboard page or standings (the Scoreboard link is hidden in the user navbar, and accessing the URL shows a friendly notice).
+								<strong>Administrators always retain full real-time access.</strong>
+							</p>
+							<div class="small text-muted">
+								Current Visibility Mode: <strong class="text-dark" id="current-visibility-text">{{ event.score_visibility | upper }}</strong>
+							</div>
+						</div>
+						<div class="col-md-4 text-right">
+							<div class="btn-group-vertical w-100" id="scoreboard-visibility-controls">
+								{% if event.scores_hidden_from_users %}
+									<button type="button" class="btn btn-success btn-lg font-weight-bold shadow-sm" onclick="toggleScoreboardVisibility('show')">
+										<i class="fas fa-eye mr-1"></i> Resume Scoreboard for Users
+									</button>
+								{% else %}
+									<button type="button" class="btn btn-warning btn-lg font-weight-bold text-dark shadow-sm" onclick="toggleScoreboardVisibility('hide')">
+										<i class="fas fa-eye-slash mr-1"></i> Stop Displaying Scoreboard
+									</button>
+								{% endif %}
+								<a href="{{ url_for('scoreboard.listing') }}" target="_blank" class="btn btn-outline-secondary btn-sm mt-2">
+									<i class="fas fa-external-link-alt mr-1"></i> Preview Live Scoreboard (Admin View)
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<!-- Challenge Unlock Times -->
 	<div class="row mb-4">
 		<div class="col-md-12">
@@ -467,6 +519,26 @@ async function saveChallengeDrops() {
 			setTimeout(() => location.reload(), 1000);
 		} else {
 			showMsg("Failed to save unlock times.", false);
+		}
+	} catch (e) {
+		showMsg(e.message, false);
+	}
+}
+
+async function toggleScoreboardVisibility(action) {
+	try {
+		const res = await fetch('/api/v1/schedule/scoreboard-visibility', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+			body: JSON.stringify({ action: action })
+		});
+		const json = await res.json();
+		if (json.success) {
+			const isHidden = json.data.is_hidden;
+			showMsg(json.data.message || (isHidden ? "Scoreboard is now hidden from users." : "Scoreboard is now visible to users."));
+			setTimeout(() => location.reload(), 900);
+		} else {
+			showMsg("Failed to update scoreboard visibility.", false);
 		}
 	} catch (e) {
 		showMsg(e.message, false);

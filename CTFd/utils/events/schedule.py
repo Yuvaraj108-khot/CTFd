@@ -27,7 +27,6 @@ def get_server_utc_timestamp() -> int:
     return int(time.time())
 
 
-@cache.memoize(timeout=5)
 def get_schedule_status() -> Dict[str, Any]:
     """Computes comprehensive event timing and status for clients."""
     now = get_server_utc_timestamp()
@@ -68,11 +67,15 @@ def get_schedule_status() -> Dict[str, Any]:
         time_to_start_seconds = max(0, start - now)
 
     is_frozen = bool(freeze and now >= freeze and (not end or now < end))
+    score_vis = get_config("score_visibility", default="public")
+    scores_hidden = score_vis in ["hidden", "admins"]
 
     return {
         "status": status,
         "is_paused": is_p,
         "is_frozen": is_frozen,
+        "score_visibility": score_vis,
+        "scores_hidden_from_users": scores_hidden,
         "server_time": now,
         "server_time_iso": datetime.datetime.utcnow().isoformat() + "Z",
         "start": start,
@@ -352,3 +355,45 @@ def reset_to_default_timer(duration_hours: int = 6, admin_user: Optional[Users] 
         "start": now,
         "end": new_end,
     }
+
+
+def set_scoreboard_visibility(visibility: str, admin_user: Optional[Users] = None) -> Dict[str, Any]:
+    """
+    Sets scoreboard visibility (e.g. 'public' or 'hidden') and logs to audit log.
+    When set to 'hidden', non-admin participants cannot view the scoreboard or rankings.
+    """
+    from CTFd.constants.options import ConfigTypes, ScoreVisibilityTypes
+
+    valid_types = [
+        ScoreVisibilityTypes.PUBLIC,
+        ScoreVisibilityTypes.PRIVATE,
+        ScoreVisibilityTypes.HIDDEN,
+        ScoreVisibilityTypes.ADMINS,
+    ]
+    if visibility not in valid_types:
+        raise ValueError(f"Invalid visibility type: {visibility}. Must be one of {valid_types}")
+
+    prev = get_config(ConfigTypes.SCORE_VISIBILITY, default=ScoreVisibilityTypes.PUBLIC)
+    set_config(ConfigTypes.SCORE_VISIBILITY, visibility)
+    clear_config()
+    clear_standings()
+    clear_challenges()
+
+    is_hidden = visibility in [ScoreVisibilityTypes.HIDDEN, ScoreVisibilityTypes.ADMINS]
+    record_schedule_audit_log(
+        action="toggle_scoreboard_visibility",
+        details={
+            "previous_visibility": prev,
+            "new_visibility": visibility,
+            "hidden_from_users": is_hidden,
+        },
+        user=admin_user,
+    )
+
+    return {
+        "success": True,
+        "score_visibility": visibility,
+        "is_hidden": is_hidden,
+        "message": "Scoreboard is now hidden from participants." if is_hidden else "Scoreboard is now visible to participants.",
+    }
+

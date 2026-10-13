@@ -140,3 +140,44 @@ def test_locked_challenge_security(app_ctx):
         # Clean up
         db.session.delete(chal)
         db.session.commit()
+
+
+def test_scoreboard_visibility_controls(app_ctx):
+    from CTFd.utils.events.schedule import set_scoreboard_visibility, get_schedule_status
+    from CTFd.models import ScheduleAuditLogs
+
+    # 1. Hide scoreboard for users
+    res = set_scoreboard_visibility("hidden")
+    assert res["success"] is True
+    assert res["is_hidden"] is True
+
+    status = get_schedule_status()
+    assert status["score_visibility"] == "hidden"
+    assert status["scores_hidden_from_users"] is True
+
+    with app_ctx.test_client() as client:
+        # Non-admin / participant should be blocked
+        sc_resp = client.get("/scoreboard")
+        assert sc_resp.status_code == 403
+
+        api_resp = client.get("/api/v1/scoreboard")
+        assert api_resp.status_code == 403
+
+    # 2. Check audit log was created
+    audit = ScheduleAuditLogs.query.filter_by(action="toggle_scoreboard_visibility").order_by(ScheduleAuditLogs.id.desc()).first()
+    assert audit is not None
+    assert audit.details["hidden_from_users"] is True
+
+    # 3. Restore scoreboard visibility
+    res = set_scoreboard_visibility("public")
+    assert res["success"] is True
+    assert res["is_hidden"] is False
+
+    status = get_schedule_status()
+    assert status["score_visibility"] == "public"
+    assert status["scores_hidden_from_users"] is False
+
+    with app_ctx.test_client() as client:
+        sc_resp = client.get("/scoreboard")
+        assert sc_resp.status_code == 200
+

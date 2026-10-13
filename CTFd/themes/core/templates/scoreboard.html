@@ -7,9 +7,26 @@
         {% trans %}Scoreboard{% endtrans %}
       </h1>
       {% if is_admin() %}
-        <span class="badge bg-danger text-white p-2" style="font-size: 0.95rem;">
-          <i class="fas fa-bolt me-1"></i> Admin View: Live &amp; Updating Every Second
-        </span>
+        <div class="d-flex align-items-center gap-2">
+          {% if Configs.score_visibility in ['hidden', 'admins'] %}
+            <span class="badge bg-warning text-dark p-2" style="font-size: 0.9rem;">
+              <i class="fas fa-eye-slash me-1"></i> Hidden from Participants
+            </span>
+            <button type="button" class="btn btn-sm btn-success fw-bold" onclick="toggleScoreboardVisibility('show')">
+              <i class="fas fa-eye me-1"></i> Show to Participants
+            </button>
+          {% else %}
+            <span class="badge bg-success text-white p-2" style="font-size: 0.9rem;">
+              <i class="fas fa-eye me-1"></i> Visible to Participants
+            </span>
+            <button type="button" class="btn btn-sm btn-warning fw-bold text-dark" onclick="toggleScoreboardVisibility('hide')">
+              <i class="fas fa-eye-slash me-1"></i> Stop Displaying for Users
+            </button>
+          {% endif %}
+          <span class="badge bg-danger text-white p-2" style="font-size: 0.9rem;">
+            <i class="fas fa-bolt me-1"></i> Admin Live View
+          </span>
+        </div>
       {% endif %}
     </div>
   </div>
@@ -72,6 +89,27 @@
   {% if is_admin() %}
   <script>
     window.scoreboardUpdateInterval = 1000;
+    async function toggleScoreboardVisibility(action) {
+      try {
+        const resp = await fetch('/api/v1/schedule/scoreboard-visibility', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'CSRF-Token': '{{ Session.nonce }}'
+          },
+          body: JSON.stringify({ action: action })
+        });
+        const data = await resp.json();
+        if (data.success) {
+          window.location.reload();
+        } else {
+          alert(data.message || 'Error updating scoreboard visibility');
+        }
+      } catch (e) {
+        console.error(e);
+        alert('Network error while toggling scoreboard visibility');
+      }
+    }
   </script>
   {% endif %}
   {{ Assets.js("assets/js/scoreboard.js") }}

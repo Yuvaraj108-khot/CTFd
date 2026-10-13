@@ -36,18 +36,41 @@ def check_score_visibility(f):
                 if request.is_json:
                     abort(403)
                 else:
-                    return (
-                        render_template(
-                            "errors/403.html", error="Scores are currently hidden"
-                        ),
-                        403,
-                    )
+                    try:
+                        return (
+                            render_template(
+                                "errors/scoreboard_hidden.html",
+                                error="The competition scoreboard and rankings have been temporarily hidden by event organizers.",
+                            ),
+                            403,
+                        )
+                    except Exception:
+                        return (
+                            render_template(
+                                "errors/403.html", error="Scores are currently hidden"
+                            ),
+                            403,
+                        )
 
         elif v == ScoreVisibilityTypes.ADMINS:
             if is_admin():
                 return f(*args, **kwargs)
             else:
-                abort(404)
+                if request.is_json:
+                    abort(404)
+                elif request.path == url_for("scoreboard.listing"):
+                    try:
+                        return (
+                            render_template(
+                                "errors/scoreboard_hidden.html",
+                                error="The scoreboard is currently restricted to administrators only.",
+                            ),
+                            403,
+                        )
+                    except Exception:
+                        abort(404)
+                else:
+                    abort(404)
 
     return _check_score_visibility
 

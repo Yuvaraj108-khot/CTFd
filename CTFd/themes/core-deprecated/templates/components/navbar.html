@@ -30,7 +30,16 @@
                     {% endif %}
                 {% endif %}
 
-                {% if Configs.account_visibility != 'admins' and Configs.score_visibility != 'admins' %}
+                {% if is_admin() %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('scoreboard.listing') }}">
+                            Scoreboard
+                            {% if Configs.score_visibility in ['hidden', 'admins'] %}
+                                <span class="badge badge-warning text-dark ml-1">Hidden</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                {% elif Configs.account_visibility != 'admins' and Configs.score_visibility not in ['hidden', 'admins'] and scores_visible() %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('scoreboard.listing') }}">Scoreboard</a>
                     </li>

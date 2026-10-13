@@ -25,6 +25,7 @@ from CTFd.utils.events.schedule import (
     record_schedule_audit_log,
     reset_to_default_timer,
     resume_competition,
+    set_scoreboard_visibility,
     validate_event_schedule,
 )
 from CTFd.utils.user import get_current_user, is_admin
@@ -366,3 +367,40 @@ class ScheduleChallengesUpdate(Resource):
             "message": f"Updated unlock times for {len(changes)} challenges.",
             "changes": changes,
         }
+
+
+@schedule_namespace.route("/scoreboard-visibility")
+class ScheduleScoreboardVisibility(Resource):
+    """Admin-only endpoint to inspect and toggle scoreboard/leaderboard visibility for participants."""
+
+    @admins_only
+    def get(self):
+        status = get_schedule_status()
+        return {
+            "success": True,
+            "data": {
+                "score_visibility": status.get("score_visibility"),
+                "is_hidden": status.get("scores_hidden_from_users", False),
+            },
+        }
+
+    @admins_only
+    def post(self):
+        req_data = request.get_json() or {}
+        action = req_data.get("action")
+        visibility = req_data.get("visibility")
+
+        if action == "hide" or visibility == "hidden":
+            target = "hidden"
+        elif action == "show" or visibility == "public":
+            target = "public"
+        elif visibility:
+            target = visibility
+        else:
+            status = get_schedule_status()
+            target = "public" if status.get("scores_hidden_from_users") else "hidden"
+
+        admin_user = get_current_user()
+        result = set_scoreboard_visibility(visibility=target, admin_user=admin_user)
+        return {"success": True, "data": result}
+

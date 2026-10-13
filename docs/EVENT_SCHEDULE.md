@@ -32,8 +32,14 @@ The Event Timing & Challenge Scheduling system adds precision clock controls, dy
 - **Challenge Unlock Scheduling & Wave Drops**:
   - Set individual unlock timestamps for any challenge.
   - **Wave Drop Scheduler**: Automatically distribute challenges across 2, 3, or 4 waves evenly spaced throughout the competition.
+- **Scoreboard / Leaderboard Display Control**:
+  - One-click toggle to stop or resume displaying the leaderboard to participants.
+  - Available on `/admin/schedule`, `/admin/scoreboard`, and `/scoreboard` (for admins).
+  - When hidden, participants do not see the Scoreboard tab in the navbar, and direct access displays a polite notice card.
+  - Administrators maintain full live access to real-time scores with an admin telemetry indicator.
 - **Audit Log**:
-  - Records every schedule change in the database with timestamp, admin username, client IP, action name, and details diff.
+  - Records every schedule change and scoreboard visibility change in the database with timestamp, admin username, client IP, action name, and details diff.
+
 
 ---
 
