@@ -33,9 +33,13 @@
 	{{ render_extra_fields(form.extra) }}
 
 	<div class="form-group">
-		<div class="form-check form-check-inline">
-			{{ form.type(class="form-control form-inline custom-select", id="type-select") }}
-		</div>
+		<label class="font-weight-bold"><i class="fas fa-user-shield text-danger mr-1"></i> Account Role (User / Admin):</label>
+		{{ form.type(class="form-control custom-select", id="type-select") }}
+		<small class="form-text text-muted">Change to <strong>Admin</strong> to grant full administrative rights, or <strong>User</strong> to revoke.</small>
+	</div>
+
+	<div class="form-group">
+		<label class="font-weight-bold d-block">Account Status:</label>
 		<div class="form-check form-check-inline">
 			{{ form.verified(class="form-check-input", autocomplete="off") }}
 			{{ form.verified.label(class="form-check-label") }}
