@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: chakravyuha-ctfd
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    region: oregon
+    envVars:
+      - key: REVERSE_PROXY
+        value: "true"
+      - key: WORKERS
+        value: "1"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: UPLOAD_FOLDER
+        value: "/var/uploads"
+    disk:
+      name: ctfd-uploads
+      mountPath: /var/uploads
+      sizeGB: 1
