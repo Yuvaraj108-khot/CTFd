@@ -1,24 +1,29 @@
-<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-  <div class="container">
-    <a href="{{ url_for('views.static_html', route='/') }}" class="navbar-brand d-inline-flex align-items-center py-1">
-      <div class="d-inline-flex align-items-center bg-white rounded-pill px-2 py-1 me-2 shadow-sm">
-        <img src="{{ url_for('views.themes', path='img/logo_acm.png') }}" alt="ACM" height="28" style="max-width: 38px; object-fit: contain;">
-      </div>
-      <span class="fw-bold tracking-wide">ACM CTF</span>
+<nav class="navbar navbar-expand-xl navbar-dark fixed-top chakravyuha-navbar">
+  <div class="container-fluid px-2 px-sm-3 px-xl-4">
+    <!-- Brand -->
+    <a href="{{ url_for('views.static_html', route='/') }}" class="navbar-brand d-inline-flex align-items-center py-1 me-2 me-sm-3">
+      <span class="brand-text">
+        <span class="brand-primary">CHAKRAVYUHA</span>
+        <span class="brand-separator">&mdash;</span>
+        <span class="brand-accent">ACM CTF</span>
+      </span>
     </a>
 
+    <!-- Mobile Toggler -->
     <button
-        class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#base-navbars"
+        class="navbar-toggler custom-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#base-navbars"
         aria-controls="base-navbars" aria-expanded="false" aria-label="Toggle navigation"
     >
       <span class="navbar-toggler-icon"></span>
     </button>
 
+    <!-- Navigation Menu -->
     <div class="collapse navbar-collapse" id="base-navbars">
-      <ul class="navbar-nav me-auto">
+      <!-- Left Navigation Items -->
+      <ul class="navbar-nav me-auto align-items-xl-center gap-1">
         {% for page in Plugins.user_menu_pages %}
           <li class="nav-item">
-            <a class="nav-link" href="{{ page.route }}" {% if page.link_target %}target="{{ page.link_target }}"{% endif %}>
+            <a class="nav-link custom-nav-link" href="{{ page.route }}" {% if page.link_target %}target="{{ page.link_target }}"{% endif %}>
               {{ page.title }}
             </a>
           </li>
@@ -26,14 +31,16 @@
 
         {% if Configs.account_visibility != 'admins' %}
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('users.listing') }}">
+            <a class="nav-link custom-nav-link" href="{{ url_for('users.listing') }}">
+              <i class="fas fa-user-friends me-2 me-xl-1"></i>
               {% trans %}Users{% endtrans %}
             </a>
           </li>
 
           {% if Configs.user_mode == 'teams' %}
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('teams.listing') }}">
+              <a class="nav-link custom-nav-link" href="{{ url_for('teams.listing') }}">
+                <i class="fas fa-users-cog me-2 me-xl-1"></i>
                 {% trans %}Teams{% endtrans %}
               </a>
             </li>
@@ -42,181 +49,311 @@
 
         {% if is_admin() %}
           <li class="nav-item">
-            <a class="nav-link d-inline-flex align-items-center" href="{{ url_for('scoreboard.listing') }}">
-              {% trans %}Scoreboard{% endtrans %}
+            <a class="nav-link custom-nav-link" href="{{ url_for('scoreboard.listing') }}">
+              <i class="fas fa-chart-line me-2 me-xl-1"></i>
+              <span>{% trans %}Scoreboard{% endtrans %}</span>
               {% if Configs.score_visibility in ['hidden', 'admins'] %}
-                <span class="badge bg-warning text-dark ms-1" style="font-size: 0.65rem; padding: 2px 5px;" title="Hidden from participants">Hidden</span>
+                <span class="badge bg-warning text-dark ms-2 ms-xl-1" style="font-size: 0.65rem; padding: 2px 6px;">Hidden</span>
               {% endif %}
             </a>
           </li>
         {% elif Configs.account_visibility != 'admins' and Configs.score_visibility not in ['hidden', 'admins'] and scores_visible() %}
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('scoreboard.listing') }}">
-              {% trans %}Scoreboard{% endtrans %}
+            <a class="nav-link custom-nav-link" href="{{ url_for('scoreboard.listing') }}">
+              <i class="fas fa-chart-line me-2 me-xl-1"></i>
+              <span>{% trans %}Scoreboard{% endtrans %}</span>
             </a>
           </li>
         {% endif %}
 
         <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('challenges.listing') }}">
-            {% trans %}Challenges{% endtrans %}
+          <a class="nav-link custom-nav-link" href="{{ url_for('challenges.listing') }}">
+            <i class="fas fa-flag-checkered me-2 me-xl-1"></i>
+            <span>{% trans %}Challenges{% endtrans %}</span>
           </a>
         </li>
 
-        <li class="nav-item d-flex align-items-center ms-md-2 my-2 my-md-0" id="nav-event-telemetry" style="display: none !important;">
-          <span class="badge d-inline-flex align-items-center px-2 py-1" id="nav-status-badge" style="font-size: 0.82rem; letter-spacing: 0.5px;">
-            <i class="fas fa-circle me-1" id="nav-status-dot" style="font-size: 0.5rem;"></i>
-            <span id="nav-status-text" class="fw-bold">LIVE</span>
-            <span class="font-monospace ms-1" id="nav-countdown-clock">00:00:00</span>
-          </span>
+        <!-- Live Telemetry Monitor Badge -->
+        <li class="nav-item d-flex align-items-center ms-xl-2 my-2 my-xl-0" id="nav-event-telemetry" style="display: none !important;">
+          <div class="telemetry-hud-badge" id="nav-status-badge">
+            <span class="telemetry-radar-dot" id="nav-status-dot"></span>
+            <span id="nav-status-text" class="telemetry-label">LIVE</span>
+            <span class="telemetry-clock" id="nav-countdown-clock">00:00:00</span>
+          </div>
         </li>
       </ul>
 
-      <hr class="d-sm-flex d-md-flex d-lg-none">
-
-      <ul class="navbar-nav ms-md-auto d-block d-sm-flex d-md-flex">
+      <!-- Right Navigation Items -->
+      <ul class="navbar-nav ms-auto align-items-xl-center gap-1">
         {% if authed() %}
 
           {% if is_admin() %}
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('admin.view') }}">
-                <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="{% trans %}Admin Panel{% endtrans %}">
-                    <i class="fas fa-wrench d-none d-md-inline d-lg-none"></i>
-                </span>
-                <span class="d-sm-inline d-md-none d-lg-inline">
-                  <i class="fas fa-wrench pe-1"></i>
-                  {% trans %}Admin Panel{% endtrans %}
-                </span>
+              <a class="nav-link custom-nav-link admin-pill-btn" href="{{ url_for('admin.view') }}">
+                <i class="fas fa-tools text-warning me-2 me-xl-1"></i>
+                <span class="fw-semibold">{% trans %}Admin Panel{% endtrans %}</span>
               </a>
             </li>
           {% endif %}
 
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('views.notifications') }}">
-              <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="{% trans %}Notifications{% endtrans %}">
-                <i class="fas fa-bell d-none d-md-inline d-lg-none"></i>
-              </span>
-              <span class="d-sm-inline d-md-none d-lg-inline">
-                  <i class="fas fa-bell pe-1"></i>
-                  <span x-data x-show="$store.unread_count > 0" x-text="$store.unread_count" class="badge rounded-pill bg-danger badge-notification"></span>
-                  {% trans %}Notifications{% endtrans %}
-              </span>
+            <a class="nav-link custom-nav-link position-relative" href="{{ url_for('views.notifications') }}">
+              <i class="fas fa-bell me-2 me-xl-1"></i>
+              <span>{% trans %}Notifications{% endtrans %}</span>
+              <span x-data x-show="$store.unread_count > 0" x-text="$store.unread_count" class="badge rounded-pill bg-danger badge-notification ms-1"></span>
             </a>
           </li>
 
           {% if Configs.user_mode == "teams" %}
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('teams.private') }}">
-                <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="{% trans %}Team{% endtrans %}">
-                  <i class="fas fa-users d-none d-md-inline d-lg-none"></i>
-                </span>
-                <span class="d-sm-inline d-md-none d-lg-inline">
-                  <i class="fas fa-users pe-1"></i>
-                  {% trans %}Team{% endtrans %}
-                </span>
+              <a class="nav-link custom-nav-link" href="{{ url_for('teams.private') }}">
+                <i class="fas fa-users me-2 me-xl-1"></i>
+                <span>{% trans %}Team{% endtrans %}</span>
               </a>
             </li>
           {% endif %}
 
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('users.private') }}">
-              <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="{% trans %}Profile{% endtrans %}">
-                <i class="fas fa-user-circle d-none d-md-inline d-lg-none"></i>
-              </span>
-              <span class="d-sm-inline d-md-none d-lg-inline">
-                <i class="fas fa-user-circle pe-1"></i>
-                {% trans %}Profile{% endtrans %}
-              </span>
+            <a class="nav-link custom-nav-link" href="{{ url_for('users.private') }}">
+              <i class="fas fa-user-circle me-2 me-xl-1"></i>
+              <span>{% trans %}Profile{% endtrans %}</span>
             </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('views.settings') }}">
-              <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="{% trans %}Settings{% endtrans %}">
-                <i class="fas fa-cogs d-none d-md-inline d-lg-none"></i>
-              </span>
-              <span class="d-sm-inline d-md-none d-lg-inline">
-                <i class="fas fa-cogs pe-1"></i>
-                {% trans %}Settings{% endtrans %}
-              </span>
+            <a class="nav-link custom-nav-link" href="{{ url_for('views.settings') }}">
+              <i class="fas fa-sliders-h me-2 me-xl-1"></i>
+              <span>{% trans %}Settings{% endtrans %}</span>
             </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('auth.logout') }}">
-              <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="{% trans %}Logout{% endtrans %}">
-                <i class="fas fa-sign-out-alt d-none d-md-inline d-lg-none"></i>
-              </span>
-              <span class="d-sm-inline d-md-none d-lg-inline">
-                <i class="fas fa-sign-out-alt pe-1"></i><span class="d-lg-none">
-                  {% trans %}Logout{% endtrans %}
-                </span>
-              </span>
+            <a class="nav-link custom-nav-link text-danger-hover" href="{{ url_for('auth.logout') }}">
+              <i class="fas fa-power-off me-2 me-xl-1"></i>
+              <span>{% trans %}Logout{% endtrans %}</span>
             </a>
           </li>
         {% else %}
 
           {% if registration_visible() %}
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('auth.register') }}">
-                <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="{% trans %}Register{% endtrans %}">
-                  <i class="fas fa-user-plus d-none d-md-inline d-lg-none"></i>
-                </span>
-                <span class="d-sm-inline d-md-none d-lg-inline">
-                  <i class="fas fa-user-plus pe-1"></i>
-                  {% trans %}Register{% endtrans %}
-                </span>
+            <li class="nav-item my-1 my-xl-0">
+              <a class="btn btn-outline-primary btn-sm px-3 py-2 fw-semibold rounded-pill w-100 w-xl-auto d-inline-flex align-items-center justify-content-center" href="{{ url_for('auth.register') }}">
+                <i class="fas fa-user-plus me-1"></i>
+                {% trans %}Register{% endtrans %}
               </a>
             </li>
           {% endif %}
 
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('auth.login') }}">
-              <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="{% trans %}Login{% endtrans %}">
-                <i class="fas fa-sign-in-alt d-none d-md-inline d-lg-none"></i>
-              </span>
-              <span class="d-sm-inline d-md-none d-lg-inline">
-                <i class="fas fa-sign-in-alt pe-1"></i>
-                {% trans %}Login{% endtrans %}
-              </span>
+          <li class="nav-item my-1 my-xl-0">
+            <a class="btn btn-primary btn-sm px-3 py-2 fw-semibold rounded-pill shadow-sm w-100 w-xl-auto d-inline-flex align-items-center justify-content-center" href="{{ url_for('auth.login') }}">
+              <i class="fas fa-sign-in-alt me-1"></i>
+              {% trans %}Login{% endtrans %}
             </a>
           </li>
         {% endif %}
 
-        <li class="nav-item dropdown">
-          <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="fas fa-language d-none d-md-inline"></i>
-            <span class="d-sm-inline d-md-none">
-              <i class="fas fa-language pe-1"></i>
-              {% trans %}Change language{% endtrans %}
-            </span>
-          </button>
-          <form x-data="LanguageForm">
-            <ul class="dropdown-menu dropdown-menu-end">
-              {% set curr_lang = get_locale() %}
-              {%- for lang in Languages.names.items() %}
-              <li>
-                  <span class="dropdown-item {{ 'bg-primary text-white' if (curr_lang == lang[0]) }}" @click="set" value="{{ lang[0] }}">
-                    {{ lang[1] }}
-                  </span>
-              </li>
-              {%- endfor %}
-            </ul>
-          </form>
-        </li>
+        <!-- Mobile Controls Row -->
+        <li class="nav-item d-flex align-items-center gap-2 pt-2 pt-xl-0 ms-xl-2 border-top border-secondary border-opacity-25 border-xl-0">
+          <!-- Language Dropdown -->
+          <div class="dropdown">
+            <button class="nav-link custom-nav-link icon-control-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="{% trans %}Change Language{% endtrans %}">
+              <i class="fas fa-globe"></i>
+            </button>
+            <form x-data="LanguageForm">
+              <ul class="dropdown-menu dropdown-menu-end shadow-lg border-secondary bg-dark">
+                {% set curr_lang = get_locale() %}
+                {%- for lang in Languages.names.items() %}
+                <li>
+                    <span class="dropdown-item text-light {{ 'bg-primary text-white fw-bold' if (curr_lang == lang[0]) }}" @click="set" value="{{ lang[0] }}">
+                      {{ lang[1] }}
+                    </span>
+                </li>
+                {%- endfor %}
+              </ul>
+            </form>
+          </div>
 
-        <li class="nav-item">
-          <button class="nav-link theme-switch" type="button">
-            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="{% trans %}Toggle theme{% endtrans %}">
-              <i class="fas fa-sun d-none d-md-inline"></i>
-            </span>
-            <span class="d-sm-inline d-md-none">
-              <i class="fas fa-sun pe-1"></i>
-              {% trans %}Toggle theme{% endtrans %}
-            </span>
+          <!-- Theme Toggle -->
+          <button class="nav-link custom-nav-link icon-control-btn theme-switch" type="button" title="Toggle Theme">
+            <i class="fas fa-sun text-warning"></i>
           </button>
         </li>
       </ul>
     </div>
   </div>
 </nav>
+
+<style>
+/* Chakravyuha 100% Mobile Responsive Navbar */
+:root {
+  --nav-height: 68px;
+}
+
+body {
+  padding-top: var(--nav-height) !important;
+}
+
+main[role="main"] {
+  padding-top: 0 !important;
+}
+
+.chakravyuha-navbar {
+  min-height: var(--nav-height);
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+  background: rgba(13, 17, 23, 0.95) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.18);
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.6);
+  z-index: 1030;
+}
+
+/* Brand Styling */
+.brand-text {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.22rem;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.brand-primary {
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.brand-separator {
+  margin: 0 0.4rem;
+  color: #38bdf8;
+  font-size: 1rem;
+}
+
+.brand-accent {
+  font-weight: 700;
+  color: #60a5fa;
+}
+
+/* Nav Links */
+.custom-nav-link {
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  color: #cbd5e1 !important;
+  padding: 0.45rem 0.75rem !important;
+  border-radius: 8px;
+  display: inline-flex !important;
+  align-items: center !important;
+  white-space: nowrap !important;
+  transition: all 0.2s ease;
+}
+
+.custom-nav-link:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.custom-nav-link:hover i {
+  color: #38bdf8;
+}
+
+/* Admin Button Pill */
+.admin-pill-btn {
+  background: rgba(234, 179, 8, 0.1) !important;
+  border: 1px solid rgba(234, 179, 8, 0.28) !important;
+  color: #fef08a !important;
+  border-radius: 20px !important;
+}
+
+/* Icon Control Buttons */
+.icon-control-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Telemetry HUD Badge */
+.telemetry-hud-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 20px;
+  padding: 0.35rem 0.85rem;
+  color: #34d399;
+  font-size: 0.84rem;
+  white-space: nowrap;
+}
+
+.telemetry-radar-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  margin-right: 0.5rem;
+  animation: radar-pulse 1.8s infinite;
+}
+
+@keyframes radar-pulse {
+  0% { transform: scale(0.9); opacity: 1; }
+  70% { transform: scale(1.15); opacity: 0.8; }
+  100% { transform: scale(0.9); opacity: 1; }
+}
+
+.telemetry-label {
+  font-weight: 700;
+  margin-right: 0.4rem;
+}
+
+.telemetry-clock {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+}
+
+/* Custom Mobile Toggler */
+.custom-toggler {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 0.35rem 0.55rem;
+  border-radius: 8px;
+}
+
+/* ========================================================= */
+/* Responsive Breakpoints (Mobile & Tablet)                  */
+/* ========================================================= */
+
+@media (max-width: 1199.98px) {
+  :root {
+    --nav-height: 60px;
+  }
+  .navbar-collapse {
+    background: #0d1117;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    max-height: calc(100svh - 75px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .custom-nav-link {
+    width: 100% !important;
+    padding: 0.65rem 0.85rem !important;
+    font-size: 1rem !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .brand-text {
+    font-size: clamp(0.92rem, 3.8vw, 1.12rem) !important;
+    max-width: calc(100vw - 85px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+</style>

@@ -38,55 +38,52 @@
 </head>
 
 <body>
-	<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-		<div class="container">
-			<a href="{{ url_for('views.static_html', route='/') }}" class="navbar-brand d-inline-flex align-items-center py-1">
-				<div class="d-inline-flex align-items-center bg-white rounded-pill px-2 py-1 mr-2 shadow-sm">
-					<img src="{{ url_for('views.themes', path='img/logo_acm.png') }}" alt="ACM" height="26" style="max-width: 36px; object-fit: contain;">
-				</div>
-				<span class="font-weight-bold">ACM CTF Admin</span>
+	<nav class="navbar navbar-expand-xl navbar-dark fixed-top admin-navbar">
+		<div class="container-fluid px-3 px-xl-4">
+			<a href="{{ url_for('views.static_html', route='/') }}" class="navbar-brand d-inline-flex align-items-center py-1 me-3">
+				<span class="font-weight-bold text-white tracking-wide" style="letter-spacing: 0.5px; font-size: 1.15rem;">CHAKRAVYUHA — ACM CTF</span>
+				<span class="badge badge-danger text-uppercase ml-2 px-2 py-1" style="font-size: 0.7rem; letter-spacing: 0.8px; font-weight: 700;">Admin</span>
 			</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#base-navbars"
 					aria-controls="base-navbars" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="base-navbars">
-				<ul class="navbar-nav mr-auto">
-					<li class="nav-item"><a class="nav-link" href="{{ url_for('admin.statistics') }}">Statistics</a></li>
-					<li class="nav-item"><a class="nav-link" href="{{ url_for('admin.notifications') }}">Notifications</a>
-					</li>
+				<ul class="navbar-nav mr-auto align-items-xl-center">
+					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.statistics') }}"><i class="fas fa-chart-pie mr-1"></i>Statistics</a></li>
+					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.notifications') }}"><i class="fas fa-bell mr-1"></i>Notifications</a></li>
 					<li class="nav-item dropdown">
-						<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">Pages</a>
+						<a href="#" class="nav-link dropdown-toggle text-nowrap" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><i class="fas fa-file-alt mr-1"></i>Pages</a>
 						<div class="dropdown-menu">
 							<a class="dropdown-item" href="{{ url_for('admin.pages_listing') }}">All Pages</a>
 							<a class="dropdown-item" href="{{ url_for('admin.pages_new') }}">New Page</a>
 						</div>
 					</li>
-					<li class="nav-item"><a class="nav-link" href="{{ url_for('admin.users_listing') }}">Users</a></li>
+					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.users_listing') }}"><i class="fas fa-user-friends mr-1"></i>Users</a></li>
 					{% if get_config('user_mode') == 'teams' %}
-					<li class="nav-item"><a class="nav-link" href="{{ url_for('admin.teams_listing') }}">Teams</a></li>
+					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.teams_listing') }}"><i class="fas fa-users mr-1"></i>Teams</a></li>
 					{% endif %}
-					<li class="nav-item"><a class="nav-link" href="{{ url_for('admin.scoreboard_listing') }}">Scoreboard</a></li>
-					<li class="nav-item"><a class="nav-link" href="{{ url_for('admin.challenges_listing') }}">Challenges</a></li>
-					<li class="nav-item"><a class="nav-link" href="{{ url_for('admin.modules_listing') }}">Modules</a></li>
-					<li class="nav-item"><a class="nav-link" href="{{ url_for('admin.audiences_listing') }}">Audiences</a></li>
+					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.scoreboard_listing') }}"><i class="fas fa-trophy mr-1"></i>Scoreboard</a></li>
+					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.challenges_listing') }}"><i class="fas fa-flag mr-1"></i>Challenges</a></li>
+					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.modules_listing') }}"><i class="fas fa-cubes mr-1"></i>Modules</a></li>
+					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.audiences_listing') }}"><i class="fas fa-user-tag mr-1"></i>Audiences</a></li>
 					<li class="nav-item dropdown">
-						<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button"
-						   aria-haspopup="true" aria-expanded="true">Submissions</a>
+						<a href="#" class="nav-link dropdown-toggle text-nowrap" data-toggle="dropdown" role="button"
+						   aria-haspopup="true" aria-expanded="true"><i class="fas fa-inbox mr-1"></i>Submissions</a>
 						<div class="dropdown-menu">
 							<a class="dropdown-item" href="{{ url_for('admin.submissions_listing') }}">All Submissions</a>
 							<a class="dropdown-item" href="{{ url_for('admin.submissions_listing', submission_type='correct') }}">Correct Submissions</a>
 							<a class="dropdown-item" href="{{ url_for('admin.submissions_listing', submission_type='incorrect') }}">Incorrect Submissions</a>
 						</div>
 					</li>
-					<li class="nav-item"><a class="nav-link" href="{{ url_for('admin.event_schedule') }}"><i class="fas fa-clock mr-1"></i>Schedule</a></li>
-					<li class="nav-item"><a class="nav-link" href="{{ url_for('admin.config') }}">Config</a></li>
+					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.event_schedule') }}"><i class="fas fa-clock mr-1 text-warning"></i>Schedule</a></li>
+					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.config') }}"><i class="fas fa-cogs mr-1"></i>Config</a></li>
 
 					{% set plugin_menu = get_admin_plugin_menu_bar() %}
 					{% set plugins = get_menubar_plugins() %}
 					{% if plugin_menu or plugins %}
 						<li class="nav-item">
-							<a class="nav-link d-none d-md-block d-lg-block">|</a>
+							<a class="nav-link d-none d-xl-block">|</a>
 						</li>
 
 						{% for menu in plugin_menu %}
@@ -96,7 +93,7 @@
 								{% set route = menu.route %}
 							{% endif %}
 							<li class="nav-item">
-								<a class="nav-link" href="{{ route }}" {% if menu.link_target %}target="{{ menu.link_target }}"{% endif %}>
+								<a class="nav-link text-nowrap" href="{{ route }}" {% if menu.link_target %}target="{{ menu.link_target }}"{% endif %}>
 									{{ menu.title }}
 								</a>
 							</li>
@@ -104,7 +101,7 @@
 
 						{% if plugins %}
 						<li class="nav-item dropdown">
-							<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Plugins <span class="caret"></span></a>
+							<a href="#" class="nav-link dropdown-toggle text-nowrap" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Plugins <span class="caret"></span></a>
 							<ul class="dropdown-menu">
 									{% for plugin in plugins %}
 											<a class="dropdown-item" href="{{ request.script_root }}{{ plugin.route }}">{{ plugin.name }}</a>
@@ -114,16 +111,103 @@
 						{% endif %}
 					{% endif %}
 				</ul>
-				<ul class="nav navbar-nav navbar-right">
+				<ul class="nav navbar-nav navbar-right align-items-xl-center">
+					<li class="nav-item mr-2">
+						<a class="btn btn-outline-info btn-sm px-3 py-1 font-weight-bold rounded-pill text-nowrap" href="{{ url_for('views.static_html', route='/') }}" target="_blank">
+							<i class="fas fa-external-link-alt mr-1"></i>View Site
+						</a>
+					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="https://docs.ctfd.io/" target="_blank">
-							<i class="far fa-question-circle"></i>
+						<a class="nav-link text-nowrap" href="https://docs.ctfd.io/" target="_blank" title="CTFd Documentation">
+							<i class="far fa-question-circle" style="font-size: 1.15rem;"></i>
 						</a>
 					</li>
 				</ul>
 			</div>
 		</div>
 	</nav>
+
+	<style>
+	:root {
+		--admin-nav-height: 64px;
+	}
+	body {
+		padding-top: var(--admin-nav-height) !important;
+	}
+	main[role="main"] {
+		padding-top: 0 !important;
+	}
+	.admin-navbar {
+		min-height: var(--admin-nav-height);
+		padding-top: 0.5rem !important;
+		padding-bottom: 0.5rem !important;
+		background: rgba(13, 17, 23, 0.96) !important;
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+		border-bottom: 1px solid rgba(239, 68, 68, 0.28) !important;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+		z-index: 1030;
+	}
+	.admin-navbar .navbar-brand {
+		white-space: nowrap !important;
+	}
+	.admin-navbar .nav-link {
+		white-space: nowrap !important;
+		font-size: 0.91rem !important;
+		font-weight: 500;
+		padding-left: 0.55rem !important;
+		padding-right: 0.55rem !important;
+		color: #cbd5e1 !important;
+		display: inline-flex !important;
+		align-items: center !important;
+		transition: color 0.15s ease, background-color 0.15s ease;
+		border-radius: 6px;
+	}
+	.admin-navbar .nav-link:hover {
+		color: #ffffff !important;
+		background-color: rgba(255, 255, 255, 0.08);
+	}
+	.admin-navbar .dropdown-menu {
+		background-color: #161b22;
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+	}
+	.admin-navbar .dropdown-item {
+		color: #e2e8f0;
+	}
+	.admin-navbar .dropdown-item:hover {
+		background-color: rgba(239, 68, 68, 0.15);
+		color: #ffffff;
+	}
+	@media (max-width: 1199.98px) {
+		:root {
+			--admin-nav-height: 58px;
+		}
+		.admin-navbar .navbar-collapse {
+			background: #161b22;
+			border-radius: 10px;
+			padding: 1rem;
+			margin-top: 0.5rem;
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			max-height: calc(100svh - 70px);
+			overflow-y: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+		.admin-navbar .nav-link {
+			width: 100% !important;
+			padding: 0.65rem 0.85rem !important;
+			font-size: 0.98rem !important;
+		}
+	}
+	@media (max-width: 575.98px) {
+		.admin-navbar .navbar-brand {
+			font-size: clamp(0.85rem, 3.5vw, 1.05rem) !important;
+			max-width: calc(100vw - 80px);
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	}
+	</style>
 
 	<main role="main">
 		{% if get_config('version_latest') %}
