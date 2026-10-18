@@ -1,5 +1,76 @@
 {% extends "admin/base.html" %}
 
+{% block stylesheets %}
+<style>
+/* Responsive Player Progression Matrix for Mobile */
+@media (max-width: 768px) {
+  /* Unfreeze sticky columns horizontally on mobile so the table scrolls naturally */
+  #matrix-scoreboard .sticky-cell,
+  #matrix-scoreboard th.sticky-col-place,
+  #matrix-scoreboard th.sticky-col-name,
+  #matrix-scoreboard th.sticky-col-score,
+  #matrix-scoreboard td.sticky-col-place,
+  #matrix-scoreboard td.sticky-col-name,
+  #matrix-scoreboard td.sticky-col-score {
+    position: static !important;
+    left: auto !important;
+  }
+
+  /* Keep challenge headers sticky vertically while scrolling down through teams */
+  #matrix-scoreboard th.sticky-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 15 !important;
+  }
+
+  /* Compact initial columns on mobile */
+  .sticky-col-place {
+    min-width: 38px !important;
+    max-width: 44px !important;
+    padding: 6px 3px !important;
+    font-size: 11px !important;
+  }
+  .sticky-col-name {
+    min-width: 105px !important;
+    max-width: 125px !important;
+    padding: 6px 4px !important;
+    font-size: 11px !important;
+  }
+  .sticky-col-score {
+    min-width: 55px !important;
+    max-width: 65px !important;
+    padding: 6px 3px !important;
+    font-size: 11px !important;
+  }
+
+  /* Slim challenge columns so multiple green solve boxes fit neatly on screen */
+  .challenge-col {
+    min-width: 60px !important;
+    max-width: 75px !important;
+    padding: 6px 2px !important;
+  }
+  .challenge-info {
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+    word-break: break-word !important;
+  }
+  .challenge-cell {
+    min-width: 60px !important;
+    max-width: 75px !important;
+    font-size: 13px !important;
+    padding: 6px 2px !important;
+  }
+
+  .matrix-container {
+    max-height: 520px !important;
+    -webkit-overflow-scrolling: touch !important;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+  }
+}
+</style>
+{% endblock %}
+
 {% block content %}
     <div class="jumbotron">
         <div class="container">
