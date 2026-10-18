@@ -50,9 +50,17 @@
             <h2 class="challenge-name text-center pt-3">
               {{ challenge.name }}
             </h2>
-            <h3 class="challenge-value text-center">
+            <h3 class="challenge-value text-center mb-2">
               {{ challenge.value }}
             </h3>
+
+            {% if solves != None %}
+              <div class="text-center mb-3">
+                <span class="badge bg-secondary px-3 py-1 rounded-pill" style="font-size: 0.85rem;">
+                  <i class="fas fa-check-circle text-success me-1"></i> {{ ngettext("%(num)d Solve", "%(num)d Solves", solves) }}
+                </span>
+              </div>
+            {% endif %}
 
 
             {% if tags %}
@@ -327,25 +335,11 @@
 
           <div role="tabpanel" class="tab-pane fade" id="solves">
             <div class="row">
-              <div class="col-md-12">
-                <table class="table table-striped align-middle text-center">
-                  <thead>
-                  <tr>
-                    <th>{% trans %}Name{% endtrans %}</th>
-                    <th>{% trans %}Date{% endtrans %}</th>
-                  </tr>
-                  </thead>
-                  <tbody id="challenge-solves-names">
-                  <template x-for="solve in solves">
-                    <tr>
-                      <td>
-                        <a :href="solve.account_url" x-text="solve.name"></a>
-                      </td>
-                      <td x-text="solve.date"></td>
-                    </tr>
-                  </template>
-                  </tbody>
-                </table>
+              <div class="col-md-12 text-center py-5">
+                <div class="display-1 fw-bold text-primary" x-text="solves.length || '{{ solves }}'">{{ solves }}</div>
+                <div class="h4 text-muted mt-2">
+                  <i class="fas fa-check-circle text-success me-1"></i> {% trans %}Total Solves{% endtrans %}
+                </div>
               </div>
             </div>
           </div>
