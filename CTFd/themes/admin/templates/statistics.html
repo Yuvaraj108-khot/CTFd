@@ -7,6 +7,7 @@
         </div>
     </div>
     <div class="container-fluid">
+        <!-- Top Statistics Metrics -->
         <div class="row mb-4">
             <div class="col-md-12 text-center">
                 <div class="d-flex justify-content-center align-items-center flex-wrap">
@@ -43,24 +44,33 @@
             </div>
         </div>
 
-        <div class="row">
+        <!-- 1. Top Teams Score Progression Graph (Prominent at Top) -->
+        <div class="row mb-4">
             <div class="col-md-12">
-                <h3>Player Progression <sup class="text-muted">(Top 100)</sup></h3>
-                <div id="scoreboard-matrix">
-                    <div class="text-center py-5">
-                        <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
+                <div class="card shadow-sm border">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-2 px-3">
+                        <h5 class="mb-0 font-weight-bold">
+                            <i class="fas fa-chart-line text-warning mr-2"></i> Top Teams Score Progression
+                        </h5>
+                        <span class="badge badge-success px-2 py-1">LIVE</span>
+                    </div>
+                    <div class="card-body p-3">
+                        <div id="top-teams-score-graph" style="height: 420px; width: 100%;">
+                            <div class="text-center py-5">
+                                <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner text-primary"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <hr>
     </div>
 
-    <div class="container">
+    <!-- 2. Challenge Solves Bar Graph -->
+    <div class="container mb-4">
         <div class="row d-flex align-items-center">
             <div class="col-md-12">
-                <div id="solves-graph" class="d-flex align-items-center">
+                <div id="solves-graph" class="d-flex align-items-center" style="height: 380px;">
                     <div class="text-center w-100">
                         <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
                     </div>
@@ -72,7 +82,7 @@
 
         <div class="row">
             <div class="col-md-12">
-                <div id="score-distribution-graph" class="d-flex align-items-center">
+                <div id="score-distribution-graph" class="d-flex align-items-center" style="min-height: 400px;">
                     <div class="text-center w-100">
                         <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
                     </div>
@@ -84,7 +94,7 @@
 
         <div class="row">
             <div class="col-md-12">
-                <div id="solve-percentages-graph" class="d-flex align-items-center">
+                <div id="solve-percentages-graph" class="d-flex align-items-center" style="min-height: 400px;">
                     <div class="text-center w-100">
                         <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
                     </div>
@@ -94,10 +104,12 @@
 
         <hr>
     </div>
-    <div class="container-fluid">
+
+    <!-- 3. Category & Points Pie Charts -->
+    <div class="container-fluid mb-4">
         <div class="row">
             <div class="col-md-4">
-                <div id="keys-pie-graph" class="d-flex align-items-center">
+                <div id="keys-pie-graph" class="d-flex align-items-center" style="min-height: 380px;">
                     <div class="text-center w-100">
                         <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
                     </div>
@@ -108,24 +120,161 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div id="categories-pie-graph" class="d-flex align-items-center">
+                <div id="categories-pie-graph" class="d-flex align-items-center" style="min-height: 380px;">
                     <div class="text-center w-100">
                         <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div id="points-pie-graph" class="d-flex align-items-center">
+                <div id="points-pie-graph" class="d-flex align-items-center" style="min-height: 380px;">
                     <div class="text-center w-100">
                         <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
                     </div>
                 </div>
             </div>
         </div>
+        <hr>
+    </div>
 
+    <!-- 4. Player Progression Matrix (Positioned Cleanly at Bottom) -->
+    <div class="container-fluid mb-5">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 class="mb-0">Player Progression <sup class="text-muted">(Top 100)</sup></h3>
+                </div>
+                <div id="scoreboard-matrix">
+                    <div class="text-center py-5">
+                        <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}
 
 {% block entrypoint %}
     {{ Assets.js("assets/js/pages/statistics.js", theme="admin") }}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script>
+(function() {
+    const palette = [
+        '#38bdf8', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
+        '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'
+    ];
+
+    async function renderTopTeamsScoreGraph() {
+        const dom = document.getElementById('top-teams-score-graph');
+        if (!dom) return;
+
+        try {
+            const res = await fetch('/api/v1/scoreboard/top/10', { credentials: 'same-origin' });
+            const json = await res.json();
+            if (!json.success || !json.data) return;
+
+            const teams = Object.values(json.data);
+            if (teams.length === 0) {
+                dom.innerHTML = '<div class="text-center py-5 text-muted"><h4>No solves recorded yet</h4></div>';
+                return;
+            }
+
+            const chart = echarts.init(dom);
+            const series = [];
+            const legendData = [];
+
+            teams.forEach((team, idx) => {
+                legendData.push(team.name);
+                let runningScore = 0;
+                const points = [];
+
+                const solves = [...team.solves].sort((a, b) => new Date(a.date) - new Date(b.date));
+                if (solves.length > 0) {
+                    const firstDate = new Date(solves[0].date).getTime();
+                    points.push([firstDate - 60000, 0]);
+                }
+
+                solves.forEach(s => {
+                    runningScore += s.value;
+                    points.push([new Date(s.date).getTime(), runningScore]);
+                });
+
+                series.push({
+                    name: team.name,
+                    type: 'line',
+                    smooth: true,
+                    showSymbol: true,
+                    symbolSize: 6,
+                    lineStyle: { width: 3 },
+                    itemStyle: { color: palette[idx % palette.length] },
+                    data: points
+                });
+            });
+
+            const option = {
+                title: {
+                    text: 'Top Teams Score Progression Over Time',
+                    left: 'center',
+                    textStyle: { fontSize: 16, fontWeight: 'bold' }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'cross' }
+                },
+                legend: {
+                    data: legendData,
+                    type: 'scroll',
+                    bottom: 0
+                },
+                toolbox: {
+                    feature: {
+                        dataZoom: { yAxisIndex: 'none' },
+                        restore: {},
+                        saveAsImage: {}
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '12%',
+                    top: '12%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'time',
+                    boundaryGap: false
+                },
+                yAxis: {
+                    type: 'value',
+                    name: 'Score'
+                },
+                dataZoom: [
+                    {
+                        type: 'slider',
+                        height: 20,
+                        bottom: 35,
+                        fillerColor: 'rgba(56, 189, 248, 0.25)'
+                    },
+                    { type: 'inside' }
+                ],
+                series: series
+            };
+
+            chart.setOption(option);
+            window.addEventListener('resize', () => chart.resize());
+        } catch (err) {
+            console.error('Error rendering top teams score graph:', err);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderTopTeamsScoreGraph);
+    } else {
+        renderTopTeamsScoreGraph();
+    }
+})();
+</script>
 {% endblock %}
