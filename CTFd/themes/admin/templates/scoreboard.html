@@ -130,7 +130,14 @@ async function toggleScoreboardVisibility(action) {
 		alert("Network error updating scoreboard visibility: " + e.message);
 	}
 }
-
+</script>
+<script src="{{ url_for('views.themes', theme='core-deprecated', path='js/echarts.bundle.min.js') }}"></script>
+<script>
+if (typeof echarts === 'undefined') {
+    document.write('<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"><\/script>');
+}
+</script>
+<script>
 (function() {
     const palette = [
         '#38bdf8', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
