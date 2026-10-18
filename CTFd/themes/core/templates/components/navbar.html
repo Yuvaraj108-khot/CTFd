@@ -1,13 +1,18 @@
 <nav class="navbar navbar-expand-xl navbar-dark fixed-top chakravyuha-navbar">
   <div class="container-fluid px-2 px-sm-3 px-xl-4">
-    <!-- Brand -->
-    <a href="{{ url_for('views.static_html', route='/') }}" class="navbar-brand d-inline-flex align-items-center py-1 me-2 me-sm-3">
-      <span class="brand-text">
-        <span class="brand-primary">CHAKRAVYUHA</span>
-        <span class="brand-separator">&mdash;</span>
-        <span class="brand-accent">ACM CTF</span>
-      </span>
-    </a>
+    <!-- Brand & Back Button -->
+    <div class="d-inline-flex align-items-center me-2 me-sm-3">
+      <button type="button" class="btn btn-outline-secondary btn-sm me-2 px-2 py-1 text-white d-inline-flex align-items-center rounded" onclick="window.history.length > 1 ? window.history.back() : window.location.href='/'" title="Go Back">
+        <i class="fas fa-arrow-left me-1"></i><span>Back</span>
+      </button>
+      <a href="{{ url_for('views.static_html', route='/') }}" class="navbar-brand d-inline-flex align-items-center py-1">
+        <span class="brand-text">
+          <span class="brand-primary">CHAKRAVYUHA</span>
+          <span class="brand-separator">&mdash;</span>
+          <span class="brand-accent">ACM CTF</span>
+        </span>
+      </a>
+    </div>
 
     <!-- Mobile Toggler -->
     <button

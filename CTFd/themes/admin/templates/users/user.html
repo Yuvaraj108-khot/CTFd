@@ -86,6 +86,11 @@
 
 <div class="jumbotron">
 	<div class="container">
+		<div class="mb-3 text-left">
+			<a href="{{ url_for('admin.users_listing') }}" class="btn btn-sm btn-outline-secondary text-white font-weight-bold">
+				<i class="fas fa-arrow-left mr-1"></i> Back to Users
+			</a>
+		</div>
 		<h1 id="team-id" class="text-center p-0 m-0">{{ user.name }}</h1>
 		<div class="mb-2">
 			{% if user.type == 'admin' %}

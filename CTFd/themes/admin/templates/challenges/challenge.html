@@ -70,6 +70,11 @@
 
 	<div class="jumbotron">
 		<div class="container">
+			<div class="mb-3 text-left">
+				<a href="{{ url_for('admin.challenges_listing') }}" class="btn btn-sm btn-outline-secondary text-white font-weight-bold">
+					<i class="fas fa-arrow-left mr-1"></i> Back to Challenges
+				</a>
+			</div>
 			<h1 class="text-center">{{ challenge.name }}</h1>
 			<h2 class="text-center">{{ challenge.category }}</h2>
 			<h2 class="text-center">{{ challenge.type }}</h2>
