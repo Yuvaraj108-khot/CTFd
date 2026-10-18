@@ -16,9 +16,10 @@ url = make_url(Config.DATABASE_URL)
 if url.drivername.startswith("sqlite"):
     exit(0)
 
-# Null out the database so raw_connection doesnt error if it doesnt exist
-# CTFd will create the database if it doesnt exist
-url = url._replace(database=None)
+# Null out the database so raw_connection doesnt error if it doesnt exist (MySQL)
+# Keep the database name intact for PostgreSQL/Supabase
+if not url.drivername.startswith("postgres"):
+    url = url._replace(database=None)
 
 # Wait for the database server to be available
 engine = create_engine(url)
