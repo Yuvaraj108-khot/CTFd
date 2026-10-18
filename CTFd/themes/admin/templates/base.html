@@ -51,29 +51,27 @@
 			<div class="collapse navbar-collapse" id="base-navbars">
 				<ul class="navbar-nav mr-auto align-items-xl-center">
 					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.statistics') }}"><i class="fas fa-chart-pie mr-1"></i>Statistics</a></li>
-					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.notifications') }}"><i class="fas fa-bell mr-1"></i>Notifications</a></li>
-					<li class="nav-item dropdown">
-						<a href="#" class="nav-link dropdown-toggle text-nowrap" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><i class="fas fa-file-alt mr-1"></i>Pages</a>
-						<div class="dropdown-menu">
-							<a class="dropdown-item" href="{{ url_for('admin.pages_listing') }}">All Pages</a>
-							<a class="dropdown-item" href="{{ url_for('admin.pages_new') }}">New Page</a>
-						</div>
-					</li>
+					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.challenges_listing') }}"><i class="fas fa-flag mr-1"></i>Challenges</a></li>
+					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.scoreboard_listing') }}"><i class="fas fa-trophy mr-1"></i>Scoreboard</a></li>
 					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.users_listing') }}"><i class="fas fa-user-friends mr-1"></i>Users</a></li>
 					{% if get_config('user_mode') == 'teams' %}
 					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.teams_listing') }}"><i class="fas fa-users mr-1"></i>Teams</a></li>
 					{% endif %}
-					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.scoreboard_listing') }}"><i class="fas fa-trophy mr-1"></i>Scoreboard</a></li>
-					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.challenges_listing') }}"><i class="fas fa-flag mr-1"></i>Challenges</a></li>
-					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.modules_listing') }}"><i class="fas fa-cubes mr-1"></i>Modules</a></li>
-					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.audiences_listing') }}"><i class="fas fa-user-tag mr-1"></i>Audiences</a></li>
 					<li class="nav-item dropdown">
-						<a href="#" class="nav-link dropdown-toggle text-nowrap" data-toggle="dropdown" role="button"
-						   aria-haspopup="true" aria-expanded="true"><i class="fas fa-inbox mr-1"></i>Submissions</a>
+						<a href="#" class="nav-link dropdown-toggle text-nowrap" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-inbox mr-1"></i>Submissions</a>
 						<div class="dropdown-menu">
 							<a class="dropdown-item" href="{{ url_for('admin.submissions_listing') }}">All Submissions</a>
 							<a class="dropdown-item" href="{{ url_for('admin.submissions_listing', submission_type='correct') }}">Correct Submissions</a>
 							<a class="dropdown-item" href="{{ url_for('admin.submissions_listing', submission_type='incorrect') }}">Incorrect Submissions</a>
+						</div>
+					</li>
+					<li class="nav-item dropdown">
+						<a href="#" class="nav-link dropdown-toggle text-nowrap" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-layer-group mr-1"></i>Manage</a>
+						<div class="dropdown-menu">
+							<a class="dropdown-item" href="{{ url_for('admin.notifications') }}"><i class="fas fa-bell mr-2 text-info"></i>Notifications</a>
+							<a class="dropdown-item" href="{{ url_for('admin.pages_listing') }}"><i class="fas fa-file-alt mr-2 text-primary"></i>Pages</a>
+							<a class="dropdown-item" href="{{ url_for('admin.modules_listing') }}"><i class="fas fa-cubes mr-2 text-warning"></i>Modules</a>
+							<a class="dropdown-item" href="{{ url_for('admin.audiences_listing') }}"><i class="fas fa-user-tag mr-2 text-success"></i>Audiences</a>
 						</div>
 					</li>
 					<li class="nav-item"><a class="nav-link text-nowrap" href="{{ url_for('admin.event_schedule') }}"><i class="fas fa-clock mr-1 text-warning"></i>Schedule</a></li>
@@ -137,11 +135,15 @@
 	main[role="main"] {
 		padding-top: 0 !important;
 	}
+	html, body {
+		overflow-x: hidden;
+		max-width: 100vw;
+	}
 	.admin-navbar {
 		min-height: var(--admin-nav-height);
-		padding-top: 0.5rem !important;
-		padding-bottom: 0.5rem !important;
-		background: rgba(13, 17, 23, 0.96) !important;
+		padding-top: 0.35rem !important;
+		padding-bottom: 0.35rem !important;
+		background: rgba(13, 17, 23, 0.98) !important;
 		backdrop-filter: blur(14px);
 		-webkit-backdrop-filter: blur(14px);
 		border-bottom: 1px solid rgba(239, 68, 68, 0.28) !important;
@@ -150,13 +152,22 @@
 	}
 	.admin-navbar .navbar-brand {
 		white-space: nowrap !important;
+		font-size: 1.05rem !important;
+	}
+	.admin-navbar .navbar-collapse {
+		flex-wrap: wrap;
+	}
+	.admin-navbar .navbar-nav {
+		flex-wrap: wrap;
 	}
 	.admin-navbar .nav-link {
 		white-space: nowrap !important;
-		font-size: 0.91rem !important;
+		font-size: 0.86rem !important;
 		font-weight: 500;
-		padding-left: 0.55rem !important;
-		padding-right: 0.55rem !important;
+		padding-left: 0.45rem !important;
+		padding-right: 0.45rem !important;
+		padding-top: 0.35rem !important;
+		padding-bottom: 0.35rem !important;
 		color: #cbd5e1 !important;
 		display: inline-flex !important;
 		align-items: center !important;
@@ -174,6 +185,8 @@
 	}
 	.admin-navbar .dropdown-item {
 		color: #e2e8f0;
+		font-size: 0.88rem;
+		padding: 0.5rem 1rem;
 	}
 	.admin-navbar .dropdown-item:hover {
 		background-color: rgba(239, 68, 68, 0.15);
@@ -201,7 +214,7 @@
 	}
 	@media (max-width: 575.98px) {
 		.admin-navbar .navbar-brand {
-			font-size: clamp(0.85rem, 3.5vw, 1.05rem) !important;
+			font-size: clamp(0.85rem, 3.5vw, 1.02rem) !important;
 			max-width: calc(100vw - 80px);
 			overflow: hidden;
 			text-overflow: ellipsis;

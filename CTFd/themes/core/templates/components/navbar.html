@@ -104,34 +104,36 @@
             </a>
           </li>
 
-          {% if Configs.user_mode == "teams" %}
-            <li class="nav-item">
-              <a class="nav-link custom-nav-link" href="{{ url_for('teams.private') }}">
-                <i class="fas fa-users me-2 me-xl-1"></i>
-                <span>{% trans %}Team{% endtrans %}</span>
-              </a>
-            </li>
-          {% endif %}
-
-          <li class="nav-item">
-            <a class="nav-link custom-nav-link" href="{{ url_for('users.private') }}">
-              <i class="fas fa-user-circle me-2 me-xl-1"></i>
-              <span>{% trans %}Profile{% endtrans %}</span>
+          <li class="nav-item dropdown">
+            <a class="nav-link custom-nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-user-circle me-1 text-info"></i>
+              <span>{% trans %}Account{% endtrans %}</span>
             </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link custom-nav-link" href="{{ url_for('views.settings') }}">
-              <i class="fas fa-sliders-h me-2 me-xl-1"></i>
-              <span>{% trans %}Settings{% endtrans %}</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link custom-nav-link text-danger-hover" href="{{ url_for('auth.logout') }}">
-              <i class="fas fa-power-off me-2 me-xl-1"></i>
-              <span>{% trans %}Logout{% endtrans %}</span>
-            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-secondary bg-dark">
+              {% if Configs.user_mode == "teams" %}
+                <li>
+                  <a class="dropdown-item text-light py-2" href="{{ url_for('teams.private') }}">
+                    <i class="fas fa-users me-2 text-primary"></i>{% trans %}Team{% endtrans %}
+                  </a>
+                </li>
+              {% endif %}
+              <li>
+                <a class="dropdown-item text-light py-2" href="{{ url_for('users.private') }}">
+                  <i class="fas fa-user me-2 text-info"></i>{% trans %}Profile{% endtrans %}
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item text-light py-2" href="{{ url_for('views.settings') }}">
+                  <i class="fas fa-sliders-h me-2 text-warning"></i>{% trans %}Settings{% endtrans %}
+                </a>
+              </li>
+              <li><hr class="dropdown-divider border-secondary"></li>
+              <li>
+                <a class="dropdown-item text-danger py-2" href="{{ url_for('auth.logout') }}">
+                  <i class="fas fa-power-off me-2"></i>{% trans %}Logout{% endtrans %}
+                </a>
+              </li>
+            </ul>
           </li>
         {% else %}
 
@@ -189,6 +191,11 @@
   --nav-height: 68px;
 }
 
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 body {
   padding-top: var(--nav-height) !important;
 }
@@ -199,9 +206,9 @@ main[role="main"] {
 
 .chakravyuha-navbar {
   min-height: var(--nav-height);
-  padding-top: 0.5rem !important;
-  padding-bottom: 0.5rem !important;
-  background: rgba(13, 17, 23, 0.95) !important;
+  padding-top: 0.35rem !important;
+  padding-bottom: 0.35rem !important;
+  background: rgba(13, 17, 23, 0.98) !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(56, 189, 248, 0.18);
@@ -213,7 +220,7 @@ main[role="main"] {
 .brand-text {
   display: inline-flex;
   align-items: center;
-  font-size: 1.22rem;
+  font-size: 1.12rem;
   letter-spacing: 0.5px;
   white-space: nowrap;
 }
@@ -224,9 +231,9 @@ main[role="main"] {
 }
 
 .brand-separator {
-  margin: 0 0.4rem;
+  margin: 0 0.35rem;
   color: #38bdf8;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .brand-accent {
@@ -236,10 +243,10 @@ main[role="main"] {
 
 /* Nav Links */
 .custom-nav-link {
-  font-size: 0.95rem !important;
+  font-size: 0.88rem !important;
   font-weight: 500 !important;
   color: #cbd5e1 !important;
-  padding: 0.45rem 0.75rem !important;
+  padding: 0.35rem 0.6rem !important;
   border-radius: 8px;
   display: inline-flex !important;
   align-items: center !important;
