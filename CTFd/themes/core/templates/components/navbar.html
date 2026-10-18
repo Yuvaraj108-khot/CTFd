@@ -1,12 +1,12 @@
 <nav class="navbar navbar-expand-xl navbar-dark fixed-top chakravyuha-navbar">
-  <div class="container-fluid px-2 px-sm-3 px-xl-4">
+  <div class="container-fluid px-2 px-sm-3 px-xl-4 d-flex align-items-center justify-content-between flex-nowrap">
     <!-- Brand & Back Button -->
-    <div class="d-inline-flex align-items-center me-2 me-sm-3">
-      <button type="button" class="btn btn-outline-secondary btn-sm me-2 px-2 py-1 text-white d-inline-flex align-items-center rounded" onclick="window.history.length > 1 ? window.history.back() : window.location.href='/'" title="Go Back">
-        <i class="fas fa-arrow-left me-1"></i><span>Back</span>
+    <div class="d-flex align-items-center me-2 min-w-0 flex-shrink-1 overflow-hidden">
+      <button type="button" class="btn btn-outline-secondary btn-sm me-1 me-sm-2 px-2 py-1 text-white d-inline-flex align-items-center rounded flex-shrink-0" onclick="window.history.length > 1 ? window.history.back() : window.location.href='/'" title="Go Back">
+        <i class="fas fa-arrow-left"></i><span class="d-none d-sm-inline ms-1">Back</span>
       </button>
-      <a href="{{ url_for('views.static_html', route='/') }}" class="navbar-brand d-inline-flex align-items-center py-1">
-        <span class="brand-text">
+      <a href="{{ url_for('views.static_html', route='/') }}" class="navbar-brand d-inline-flex align-items-center py-1 m-0 text-truncate">
+        <span class="brand-text text-truncate">
           <span class="brand-primary">CHAKRAVYUHA</span>
           <span class="brand-separator">&mdash;</span>
           <span class="brand-accent">ACM CTF</span>
@@ -16,7 +16,7 @@
 
     <!-- Mobile Toggler -->
     <button
-        class="navbar-toggler custom-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#base-navbars"
+        class="navbar-toggler custom-toggler flex-shrink-0 ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#base-navbars"
         aria-controls="base-navbars" aria-expanded="false" aria-label="Toggle navigation"
     >
       <span class="navbar-toggler-icon"></span>
@@ -340,9 +340,17 @@ main[role="main"] {
 
 @media (max-width: 1199.98px) {
   :root {
-    --nav-height: 60px;
+    --nav-height: 58px;
+  }
+  .chakravyuha-navbar {
+    min-height: 58px;
+  }
+  .chakravyuha-navbar > .container-fluid {
+    flex-wrap: wrap !important;
   }
   .navbar-collapse {
+    flex-basis: 100%;
+    width: 100%;
     background: #0d1117;
     border-radius: 12px;
     padding: 1rem;
@@ -361,11 +369,28 @@ main[role="main"] {
 }
 
 @media (max-width: 575.98px) {
+  :root {
+    --nav-height: 54px;
+  }
+  .chakravyuha-navbar {
+    min-height: 54px;
+  }
   .brand-text {
-    font-size: clamp(0.92rem, 3.8vw, 1.12rem) !important;
-    max-width: calc(100vw - 85px);
+    font-size: clamp(0.78rem, 3.4vw, 0.98rem) !important;
+    max-width: calc(100vw - 110px);
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .custom-toggler {
+    padding: 0.25rem 0.45rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .brand-separator, .brand-accent {
+    display: none !important;
   }
 }
 </style>

@@ -39,17 +39,17 @@
 
 <body>
 	<nav class="navbar navbar-expand-xl navbar-dark fixed-top admin-navbar">
-		<div class="container-fluid px-3 px-xl-4">
-			<div class="d-inline-flex align-items-center me-2 me-xl-3">
-				<button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1 mr-2 text-white d-inline-flex align-items-center rounded" onclick="window.history.length > 1 ? window.history.back() : window.location.href='{{ url_for('admin.statistics') }}'" title="Go Back">
-					<i class="fas fa-arrow-left mr-1"></i><span>Back</span>
+		<div class="container-fluid px-2 px-sm-3 px-xl-4 d-flex align-items-center justify-content-between flex-nowrap">
+			<div class="d-flex align-items-center mr-2 min-w-0 flex-shrink-1 overflow-hidden">
+				<button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1 mr-1 mr-sm-2 text-white d-inline-flex align-items-center rounded flex-shrink-0" onclick="window.history.length > 1 ? window.history.back() : window.location.href='{{ url_for('admin.statistics') }}'" title="Go Back">
+					<i class="fas fa-arrow-left"></i><span class="d-none d-sm-inline ml-1">Back</span>
 				</button>
-				<a href="{{ url_for('views.static_html', route='/') }}" class="navbar-brand d-inline-flex align-items-center py-1">
-					<span class="font-weight-bold text-white tracking-wide" style="letter-spacing: 0.5px; font-size: 1.05rem;">CHAKRAVYUHA — ACM CTF</span>
-					<span class="badge badge-danger text-uppercase ml-2 px-2 py-1" style="font-size: 0.7rem; letter-spacing: 0.8px; font-weight: 700;">Admin</span>
+				<a href="{{ url_for('views.static_html', route='/') }}" class="navbar-brand d-inline-flex align-items-center py-1 m-0 text-truncate">
+					<span class="font-weight-bold text-white tracking-wide brand-text text-truncate" style="letter-spacing: 0.5px;">CHAKRAVYUHA — ACM CTF</span>
+					<span class="badge badge-danger text-uppercase ml-2 px-2 py-1 flex-shrink-0" style="font-size: 0.68rem; letter-spacing: 0.8px; font-weight: 700;">Admin</span>
 				</a>
 			</div>
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#base-navbars"
+			<button class="navbar-toggler flex-shrink-0 ml-auto" type="button" data-toggle="collapse" data-target="#base-navbars"
 					aria-controls="base-navbars" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
@@ -201,7 +201,15 @@
 		:root {
 			--admin-nav-height: 58px;
 		}
+		.admin-navbar {
+			min-height: 58px;
+		}
+		.admin-navbar > .container-fluid {
+			flex-wrap: wrap !important;
+		}
 		.admin-navbar .navbar-collapse {
+			flex-basis: 100%;
+			width: 100%;
 			background: #161b22;
 			border-radius: 10px;
 			padding: 1rem;
@@ -218,11 +226,23 @@
 		}
 	}
 	@media (max-width: 575.98px) {
-		.admin-navbar .navbar-brand {
-			font-size: clamp(0.85rem, 3.5vw, 1.02rem) !important;
-			max-width: calc(100vw - 80px);
+		:root {
+			--admin-nav-height: 54px;
+		}
+		.admin-navbar {
+			min-height: 54px;
+		}
+		.admin-navbar .brand-text {
+			font-size: clamp(0.78rem, 3.4vw, 0.98rem) !important;
+			max-width: calc(100vw - 130px);
 			overflow: hidden;
 			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+	@media (max-width: 380px) {
+		.admin-navbar .badge {
+			display: none !important;
 		}
 	}
 	</style>
