@@ -150,27 +150,36 @@
             </div>
 
             <!-- Attachments & Google Drive Links -->
-            <div class="card mb-3">
-              <div class="card-header py-2 d-flex justify-content-between align-items-center flex-wrap">
+            <div class="card mb-3 border-secondary">
+              <div class="card-header py-2 d-flex justify-content-between align-items-center">
                 <div>
-                  <strong>Challenge Attachments & Google Drive Links</strong> (<span id="pageAttachCount">0</span>)
-                  <br><small class="text-muted">Attach files or paste Google Drive / external links</small>
+                  <strong><i class="fas fa-paperclip text-primary mr-1"></i> Challenge Attachments</strong>
+                  <span class="badge badge-primary ml-1" id="pageAttachCount">0</span>
                 </div>
-                <div class="btn-group mt-1">
-                  <button type="button" class="btn btn-sm btn-outline-info" onclick="promptAddPageGDriveLink()">
-                    <i class="fab fa-google-drive"></i> Add Google Drive Link
-                  </button>
-                  <label class="btn btn-sm btn-outline-secondary mb-0 cursor-pointer ml-1">
-                    <i class="fas fa-file-upload"></i> Upload File
-                    <input type="file" id="pageFilesInput" name="files" multiple class="d-none" onchange="handlePageFileSelect(this)">
-                  </label>
-                </div>
+                <small class="text-muted">Files & Google Drive</small>
               </div>
-              <div class="card-body py-2">
-                <div id="pageEmptyAttachText" class="text-muted small text-center py-2">
-                  No files or Google Drive links attached.
+              <div class="card-body p-2 p-sm-3">
+                <!-- Responsive Action Buttons (Stacked on Mobile, Side-by-Side on Desktop) -->
+                <div class="row no-gutters mb-2">
+                  <div class="col-12 col-sm-6 pr-0 pr-sm-1 mb-2 mb-sm-0">
+                    <label class="btn btn-outline-primary btn-block mb-0 cursor-pointer py-2 d-flex align-items-center justify-content-center" style="border-radius: 8px;">
+                      <i class="fas fa-cloud-upload-alt mr-2 fa-lg"></i>
+                      <span class="font-weight-bold">Upload Local Files</span>
+                      <input type="file" id="pageFilesInput" name="files" multiple class="d-none" onchange="handlePageFileSelect(this)">
+                    </label>
+                  </div>
+                  <div class="col-12 col-sm-6 pl-0 pl-sm-1">
+                    <button type="button" class="btn btn-outline-info btn-block py-2 d-flex align-items-center justify-content-center" style="border-radius: 8px;" onclick="promptAddPageGDriveLink()">
+                      <i class="fab fa-google-drive mr-2 fa-lg"></i>
+                      <span class="font-weight-bold">Add Google Drive Link</span>
+                    </button>
+                  </div>
                 </div>
-                <div id="pageAttachedList" class="list-group list-group-flush"></div>
+
+                <div id="pageEmptyAttachText" class="text-muted small text-center py-2 px-2 border rounded" style="border-style: dashed !important;">
+                  <i class="fas fa-folder-open mr-1"></i> No files or Drive links attached yet. Tap a button above to add.
+                </div>
+                <div id="pageAttachedList" class="list-group list-group-flush mt-2"></div>
               </div>
             </div>
 
@@ -279,13 +288,13 @@ function renderPageAttachedItems() {
 
   pageAttachedGDriveLinks.forEach((item, idx) => {
     html += `
-      <div class="list-group-item d-flex justify-content-between align-items-center py-2">
-        <div>
-          <i class="fab fa-google-drive text-info mr-2"></i>
+      <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-2 border rounded mb-1 bg-light">
+        <div class="text-truncate mr-2 min-w-0" style="max-width: calc(100% - 35px);">
+          <i class="fab fa-google-drive text-info mr-1"></i>
           <strong>${item.name}</strong>
-          <a href="${item.url}" target="_blank" class="small text-muted ml-2 text-truncate d-inline-block" style="max-width: 320px;">(${item.url})</a>
+          <div class="small text-muted text-truncate">${item.url}</div>
         </div>
-        <button type="button" class="btn btn-sm text-danger p-0 border-0" onclick="removePageGDriveLink(${idx})" title="Remove link">&times;</button>
+        <button type="button" class="btn btn-sm btn-outline-danger p-0 rounded-circle flex-shrink-0" style="width: 24px; height: 24px; line-height: 1;" onclick="removePageGDriveLink(${idx})" title="Remove link">&times;</button>
       </div>
     `;
     inputsHtml += `<input type="hidden" name="gdrive_links[]" value="${item.url}">`;
@@ -295,13 +304,13 @@ function renderPageAttachedItems() {
   pageAttachedFiles.forEach((file, idx) => {
     const sizeKb = (file.size / 1024).toFixed(1);
     html += `
-      <div class="list-group-item d-flex justify-content-between align-items-center py-2">
-        <div>
-          <i class="fas fa-file-alt text-secondary mr-2"></i>
+      <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-2 border rounded mb-1 bg-light">
+        <div class="text-truncate mr-2 min-w-0" style="max-width: calc(100% - 35px);">
+          <i class="fas fa-file-alt text-warning mr-1"></i>
           <strong>${file.name}</strong>
-          <span class="small text-muted ml-2">(${sizeKb} KB)</span>
+          <span class="badge badge-secondary ml-1">${sizeKb} KB</span>
         </div>
-        <button type="button" class="btn btn-sm text-danger p-0 border-0" onclick="removePageFileItem(${idx})" title="Remove file">&times;</button>
+        <button type="button" class="btn btn-sm btn-outline-danger p-0 rounded-circle flex-shrink-0" style="width: 24px; height: 24px; line-height: 1;" onclick="removePageFileItem(${idx})" title="Remove file">&times;</button>
       </div>
     `;
   });
