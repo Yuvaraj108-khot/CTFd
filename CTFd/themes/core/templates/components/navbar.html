@@ -114,21 +114,21 @@
               <i class="fas fa-user-circle me-1 text-info"></i>
               <span>{% trans %}Account{% endtrans %}</span>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-secondary bg-dark">
+            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-lg border-secondary">
               {% if Configs.user_mode == "teams" %}
                 <li>
-                  <a class="dropdown-item text-light py-2" href="{{ url_for('teams.private') }}">
+                  <a class="dropdown-item py-2" href="{{ url_for('teams.private') }}">
                     <i class="fas fa-users me-2 text-primary"></i>{% trans %}Team{% endtrans %}
                   </a>
                 </li>
               {% endif %}
               <li>
-                <a class="dropdown-item text-light py-2" href="{{ url_for('users.private') }}">
+                <a class="dropdown-item py-2" href="{{ url_for('users.private') }}">
                   <i class="fas fa-user me-2 text-info"></i>{% trans %}Profile{% endtrans %}
                 </a>
               </li>
               <li>
-                <a class="dropdown-item text-light py-2" href="{{ url_for('views.settings') }}">
+                <a class="dropdown-item py-2" href="{{ url_for('views.settings') }}">
                   <i class="fas fa-sliders-h me-2 text-warning"></i>{% trans %}Settings{% endtrans %}
                 </a>
               </li>
@@ -167,11 +167,11 @@
               <i class="fas fa-globe"></i>
             </button>
             <form x-data="LanguageForm">
-              <ul class="dropdown-menu dropdown-menu-end shadow-lg border-secondary bg-dark">
+              <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-lg border-secondary">
                 {% set curr_lang = get_locale() %}
                 {%- for lang in Languages.names.items() %}
                 <li>
-                    <span class="dropdown-item text-light {{ 'bg-primary text-white fw-bold' if (curr_lang == lang[0]) }}" @click="set" value="{{ lang[0] }}">
+                    <span class="dropdown-item {{ 'bg-primary text-white fw-bold' if (curr_lang == lang[0]) }}" @click="set" value="{{ lang[0] }}">
                       {{ lang[1] }}
                     </span>
                 </li>
@@ -266,6 +266,49 @@ main[role="main"] {
 
 .custom-nav-link:hover i {
   color: #38bdf8;
+}
+
+/* Dropdown Menus Dark Styling & Hover Fix */
+.chakravyuha-navbar .dropdown-menu {
+  background: #161b22 !important;
+  border: 1px solid rgba(56, 189, 248, 0.25) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+  border-radius: 10px;
+  padding: 0.5rem 0.35rem;
+}
+
+.chakravyuha-navbar .dropdown-item {
+  color: #e2e8f0 !important;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 0.5rem 0.85rem !important;
+  transition: all 0.15s ease-in-out;
+}
+
+.chakravyuha-navbar .dropdown-item:hover,
+.chakravyuha-navbar .dropdown-item:focus {
+  color: #ffffff !important;
+  background-color: rgba(56, 189, 248, 0.2) !important;
+}
+
+.chakravyuha-navbar .dropdown-item:hover i,
+.chakravyuha-navbar .dropdown-item:focus i {
+  color: #38bdf8 !important;
+}
+
+.chakravyuha-navbar .dropdown-item.text-danger {
+  color: #f87171 !important;
+}
+
+.chakravyuha-navbar .dropdown-item.text-danger:hover,
+.chakravyuha-navbar .dropdown-item.text-danger:focus {
+  color: #ffffff !important;
+  background-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+.chakravyuha-navbar .dropdown-item.text-danger:hover i,
+.chakravyuha-navbar .dropdown-item.text-danger:focus i {
+  color: #ffffff !important;
 }
 
 /* Admin Button Pill */
