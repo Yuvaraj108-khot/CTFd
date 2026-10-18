@@ -17,3 +17,9 @@ CTFd/uploads/**/*
 **/__pycache__
 .venv*
 venv*
+frontend
+tests
+docs
+*.zip
+*.db
+.pytest_cache

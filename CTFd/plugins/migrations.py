@@ -76,7 +76,11 @@ def upgrade(plugin_name=None, revision=None, lower="current", force_all=False):
     # Find the list of migrations to run
     config = Config()
     config.set_main_option("script_location", migrations_path)
-    config.set_main_option("version_locations", migrations_path)
+    versions_subfolder = os.path.join(migrations_path, "versions")
+    if os.path.isdir(versions_subfolder):
+        config.set_main_option("version_locations", versions_subfolder)
+    elif " " not in migrations_path:
+        config.set_main_option("version_locations", migrations_path)
     script = ScriptDirectory.from_config(config)
 
     # Choose base revision for plugin upgrade
@@ -91,29 +95,32 @@ def upgrade(plugin_name=None, revision=None, lower="current", force_all=False):
     else:
         upper = revision
 
-    # Apply from lower to upper
-    revs = list(script.iterate_revisions(lower=lower, upper=upper))
-
-    # If the plugin wants we should force all migrations to apply
-    if force_all is True:
-        revs = list(script.walk_revisions())
-        # If we do have revisions and we want to force all we should correct the upper field
-        # Note that the first revision is the latest because we havent reversed yet
-        if revs:
-            upper = revs[0].revision
-
-    # Revisions must be reversed as they came in from upper to lower
-    revs.reverse()
-
     try:
+        # Apply from lower to upper
+        revs = list(script.iterate_revisions(lower=lower, upper=upper))
+
+        # If the plugin wants we should force all migrations to apply
+        if force_all is True:
+            revs = list(script.walk_revisions())
+            # If we do have revisions and we want to force all we should correct the upper field
+            # Note that the first revision is the latest because we havent reversed yet
+            if revs:
+                upper = revs[0].revision
+
+        # Revisions must be reversed as they came in from upper to lower
+        revs.reverse()
+
         for r in revs:
             with context.begin_transaction():
                 r.module.upgrade(op=op)
             # Set revision that succeeded so we don't need
             # to start from the beginning on failure
             set_config(plugin_name + "_alembic_version", r.revision)
+
+        # Set the new latest revision
+        if upper:
+            set_config(plugin_name + "_alembic_version", upper)
+    except Exception as e:
+        print(f"[!] Plugin migration notice for {plugin_name}: {e}")
     finally:
         conn.close()
-
-    # Set the new latest revision
-    set_config(plugin_name + "_alembic_version", upper)

@@ -144,8 +144,8 @@ class ServerConfig(object):
         CACHE_DIR: str = os.path.join(
             os.path.dirname(__file__), os.pardir, ".data", "filesystem_cache"
         )
-        # Override the threshold of cached values on the filesystem. The default is 500. Don't change unless you know what you're doing.
-        CACHE_THRESHOLD: int = 0
+        # Override the threshold of cached values on the filesystem. The default is 500.
+        CACHE_THRESHOLD: int = 1000
 
     # === SECURITY ===
     SESSION_COOKIE_HTTPONLY: bool = config_ini["security"].getboolean("SESSION_COOKIE_HTTPONLY", fallback=True)
