@@ -35,10 +35,11 @@
 			<link rel="stylesheet" type="text/css" href="{{ stylesheet }}">
 		{% endif %}
 	{% endfor %}
+	<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 </head>
 
 <body>
-	<nav class="navbar navbar-expand-xl navbar-dark fixed-top admin-navbar">
+	<nav class="navbar navbar-expand-xl navbar-dark sticky-top admin-navbar">
 		<div class="container-fluid px-2 px-sm-3 px-xl-4 d-flex align-items-center justify-content-between flex-nowrap">
 			<div class="d-flex align-items-center mr-2 min-w-0 flex-shrink-1 overflow-hidden">
 				<button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1 mr-1 mr-sm-2 text-white d-inline-flex align-items-center rounded flex-shrink-0" onclick="window.history.length > 1 ? window.history.back() : window.location.href='{{ url_for('admin.statistics') }}'" title="Go Back">
@@ -127,19 +128,21 @@
 
 	<style>
 	:root {
-		--admin-nav-height: 64px;
+		--admin-nav-height: 56px;
 	}
 	body {
-		padding-top: var(--admin-nav-height) !important;
-	}
-	main[role="main"] {
 		padding-top: 0 !important;
 	}
-	html, body {
-		overflow-x: hidden;
-		max-width: 100vw;
+	main[role="main"] {
+		padding-top: 0.5rem !important;
 	}
 	.admin-navbar {
+		position: -webkit-sticky !important;
+		position: sticky !important;
+		top: 0 !important;
+		left: 0 !important;
+		right: 0 !important;
+		width: 100% !important;
 		min-height: var(--admin-nav-height);
 		padding-top: 0.35rem !important;
 		padding-bottom: 0.35rem !important;
@@ -148,7 +151,7 @@
 		-webkit-backdrop-filter: blur(14px);
 		border-bottom: 1px solid rgba(239, 68, 68, 0.28) !important;
 		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-		z-index: 1030;
+		z-index: 1050 !important;
 	}
 	.admin-navbar .navbar-brand {
 		white-space: nowrap !important;

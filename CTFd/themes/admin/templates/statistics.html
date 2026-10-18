@@ -230,18 +230,23 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('views.themes', theme='core-deprecated', path='js/echarts.bundle.min.js') }}"></script>
-<script>
-if (typeof echarts === 'undefined') {
-    document.write('<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"><\/script>');
-}
-</script>
 <script>
 (function() {
     const palette = [
         '#38bdf8', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
         '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'
     ];
+
+    async function ensureEcharts() {
+        if (typeof echarts !== 'undefined') return true;
+        return new Promise((resolve) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js';
+            s.onload = () => resolve(true);
+            s.onerror = () => resolve(false);
+            document.head.appendChild(s);
+        });
+    }
 
     async function renderTopTeamsScoreGraph() {
         const dom = document.getElementById('top-teams-score-graph');
@@ -250,7 +255,10 @@ if (typeof echarts === 'undefined') {
         try {
             const res = await fetch('/api/v1/scoreboard/top/10', { credentials: 'same-origin' });
             const json = await res.json();
-            if (!json.success || !json.data) return;
+            if (!json.success || !json.data) {
+                dom.innerHTML = '<div class="text-center py-5 text-muted"><h4>Unable to load score data</h4></div>';
+                return;
+            }
 
             const teams = Object.values(json.data);
             if (teams.length === 0) {
@@ -258,6 +266,13 @@ if (typeof echarts === 'undefined') {
                 return;
             }
 
+            await ensureEcharts();
+            if (typeof echarts === 'undefined') {
+                dom.innerHTML = '<div class="text-center py-5 text-muted"><h4>Chart engine unavailable</h4></div>';
+                return;
+            }
+
+            dom.innerHTML = '';
             const chart = echarts.init(dom);
             const series = [];
             const legendData = [];
@@ -343,6 +358,9 @@ if (typeof echarts === 'undefined') {
             window.addEventListener('resize', () => chart.resize());
         } catch (err) {
             console.error('Error rendering top teams score graph:', err);
+            if (dom) {
+                dom.innerHTML = '<div class="text-center py-5 text-muted"><h4>Failed to render score progression graph</h4></div>';
+            }
         }
     }
 
