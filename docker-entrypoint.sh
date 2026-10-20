@@ -7,20 +7,10 @@ if [ "$(id -u)" = "0" ]; then
     chown -R 1001:1001 /var/uploads /var/log/CTFd 2>/dev/null || true
     chmod -R 775 /var/uploads /var/log/CTFd 2>/dev/null || true
 
-    # Seed the persistent volume with our existing ctfd.db if it does not yet exist on disk
-    if [ -f "/opt/CTFd/CTFd/ctfd.db" ] && [ ! -f "/var/uploads/ctfd.db" ]; then
-        echo "[+] Seeding /var/uploads/ctfd.db from existing database..."
-        cp /opt/CTFd/CTFd/ctfd.db /var/uploads/ctfd.db
-        chown 1001:1001 /var/uploads/ctfd.db 2>/dev/null || true
-        chmod 664 /var/uploads/ctfd.db 2>/dev/null || true
-    fi
-
-    # Seed challenge uploads into /var/uploads if missing
-    if [ -d "/opt/CTFd/CTFd/uploads" ]; then
-        echo "[+] Seeding existing challenge uploads to /var/uploads..."
-        cp -rn /opt/CTFd/CTFd/uploads/* /var/uploads/ 2>/dev/null || true
-        chown -R 1001:1001 /var/uploads 2>/dev/null || true
-    fi
+    # Run seed_db.py to verify and populate the persistent disk with our 27 challenges
+    python /opt/CTFd/seed_db.py || true
+    chown -R 1001:1001 /var/uploads 2>/dev/null || true
+    chmod -R 775 /var/uploads 2>/dev/null || true
 
     # Re-execute as ctfd user (1001)
     exec su -s /bin/bash ctfd "$0" "$@"
