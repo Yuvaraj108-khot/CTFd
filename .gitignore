@@ -72,15 +72,21 @@ flask_profiler.sql
 # CTFd-specific
 CTFd/static/uploads
 CTFd/uploads
+!CTFd/uploads/
+!CTFd/uploads/**
 .data/
 .ctfd_secret_key
 .flaskenv
 *.db
+!CTFd/ctfd.db
 *.log
 *.log.*
 
 # CTFd exports
 *.zip
+!export.zip
+!export_current.zip
+
 
 # non-default plugins
 CTFd/plugins/*

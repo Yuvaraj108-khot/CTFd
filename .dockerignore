@@ -1,8 +1,10 @@
 CTFd/logs/*.log
 CTFd/static/uploads
-CTFd/uploads
-CTFd/*.db
-CTFd/uploads/**/*
+# Allow CTFd/uploads and ctfd.db into Docker container
+!CTFd/uploads
+!CTFd/uploads/**/*
+!CTFd/ctfd.db
+
 .ctfd_secret_key
 .data
 .git
@@ -22,4 +24,5 @@ tests
 docs
 *.zip
 *.db
+!CTFd/ctfd.db
 .pytest_cache

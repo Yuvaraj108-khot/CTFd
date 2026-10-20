@@ -1,6 +1,31 @@
 #!/bin/bash
 set -euo pipefail
 
+# If running as root, fix volume permissions, seed existing db/uploads, and drop to ctfd user
+if [ "$(id -u)" = "0" ]; then
+    mkdir -p /var/uploads /var/log/CTFd
+    chown -R 1001:1001 /var/uploads /var/log/CTFd 2>/dev/null || true
+    chmod -R 775 /var/uploads /var/log/CTFd 2>/dev/null || true
+
+    # Seed the persistent volume with our existing ctfd.db if it does not yet exist on disk
+    if [ -f "/opt/CTFd/CTFd/ctfd.db" ] && [ ! -f "/var/uploads/ctfd.db" ]; then
+        echo "[+] Seeding /var/uploads/ctfd.db from existing database..."
+        cp /opt/CTFd/CTFd/ctfd.db /var/uploads/ctfd.db
+        chown 1001:1001 /var/uploads/ctfd.db 2>/dev/null || true
+        chmod 664 /var/uploads/ctfd.db 2>/dev/null || true
+    fi
+
+    # Seed challenge uploads into /var/uploads if missing
+    if [ -d "/opt/CTFd/CTFd/uploads" ]; then
+        echo "[+] Seeding existing challenge uploads to /var/uploads..."
+        cp -rn /opt/CTFd/CTFd/uploads/* /var/uploads/ 2>/dev/null || true
+        chown -R 1001:1001 /var/uploads 2>/dev/null || true
+    fi
+
+    # Re-execute as ctfd user (1001)
+    exec su -s /bin/bash ctfd "$0" "$@"
+fi
+
 WORKERS=${WORKERS:-1}
 WORKER_CLASS=${WORKER_CLASS:-gthread}
 THREADS=${THREADS:-8}
