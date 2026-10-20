@@ -22,7 +22,11 @@ venv*
 frontend
 tests
 docs
+dist
 *.zip
+*.tar.gz
+Vagrantfile
+CHANGELOG.md
 *.db
 !CTFd/ctfd.db
 .pytest_cache

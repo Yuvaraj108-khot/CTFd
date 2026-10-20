@@ -82,10 +82,9 @@ CTFd/uploads
 *.log
 *.log.*
 
-# CTFd exports
+# CTFd exports and dist
 *.zip
-!export.zip
-!export_current.zip
+dist/
 
 
 # non-default plugins
