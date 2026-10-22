@@ -1,7 +1,13 @@
 import argparse
 import sys
+from dotenv import load_dotenv
+
+# Ensure Supabase PostgreSQL and environment variables are loaded
+load_dotenv(".flaskenv")
+load_dotenv()
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--host", help="Host for server to listen on", default="0.0.0.0")
 parser.add_argument("--port", help="Port for debug server to listen on", default=4000)
 parser.add_argument(
     "--profile", help="Enable flask_profiler profiling", action="store_true"
@@ -53,9 +59,10 @@ if args.profile:
     toolbar.init_app(app)
     print(" * Flask profiling running at http://127.0.0.1:4000/flask-profiler/")
 
-if use_waitress:
-    print(f" * Serving CTFd with Waitress (multi-threaded, 16 workers) at http://127.0.0.1:{args.port}")
-    waitress.serve(app, host="127.0.0.1", port=args.port, threads=16, connection_limit=100)
-else:
-    app.run(debug=True, threaded=True, host="127.0.0.1", port=args.port)
+if __name__ == "__main__":
+    if use_waitress:
+        print(f" * Serving CTFd with Waitress (multi-threaded, 16 workers) at http://{args.host}:{args.port}")
+        waitress.serve(app, host=args.host, port=args.port, threads=16, connection_limit=100)
+    else:
+        app.run(debug=True, threaded=True, host=args.host, port=args.port)
 

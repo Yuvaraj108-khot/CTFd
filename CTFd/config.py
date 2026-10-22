@@ -113,8 +113,11 @@ class ServerConfig(object):
                 database=empty_str_cast(config_ini["server"]["DATABASE_NAME"]) or "ctfd",
             ))
         else:
-            # default to local SQLite DB
-            DATABASE_URL = f"sqlite:///{os.path.dirname(os.path.abspath(__file__))}/ctfd.db"
+            # Enforce Supabase PostgreSQL (never store data locally in SQLite)
+            DATABASE_URL = (
+                os.getenv("DATABASE_URL")
+                or "postgresql://postgres.lzdmnvzytzyamzwkoozu:Qzmm1KR4r0Q2HC8h@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
+            )
 
     REDIS_URL: str = empty_str_cast(config_ini["server"]["REDIS_URL"])
 

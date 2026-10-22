@@ -76,9 +76,10 @@ CTFd/uploads
 !CTFd/uploads/**
 .data/
 .ctfd_secret_key
-.flaskenv
+.env
 *.db
-!CTFd/ctfd.db
+*.db.*
+*.db.disabled
 *.log
 *.log.*
 

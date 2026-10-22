@@ -1,4 +1,8 @@
 import sys
+from dotenv import load_dotenv
+
+load_dotenv(".flaskenv")
+load_dotenv()
 from CTFd import create_app
 from CTFd.constants.themes import DEFAULT_THEME
 from CTFd.utils import set_config, get_config

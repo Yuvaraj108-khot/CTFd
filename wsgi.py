@@ -1,4 +1,8 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv(".flaskenv")
+load_dotenv()
 
 # Detect if we're running via `flask run` and don't monkey patch
 if not os.getenv("FLASK_RUN_FROM_CLI"):
